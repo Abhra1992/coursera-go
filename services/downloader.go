@@ -5,15 +5,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os/exec"
 	"strings"
 )
 
-type Downloader interface {
+type IDownloader interface {
 	Download(url string, file string, resume bool)
-}
-
-type DownloadCommand interface {
 	startDownload(url string, file string, resume bool)
 	createCommand(url string, file string) []string
 	enableResume(command []string) []string
@@ -21,7 +17,7 @@ type DownloadCommand interface {
 }
 
 type ExternalDownloader struct {
-	DownloadCommand
+	IDownloader
 	Session *api.CourseraSession
 	Binary  string
 }
@@ -33,11 +29,15 @@ func (ed *ExternalDownloader) startDownload(url string, file string, resume bool
 		command = ed.enableResume(command)
 	}
 	log.Printf("Executing %s %s", ed.Binary, command)
-	process := exec.Command(ed.Binary, command...)
-	err := process.Run()
-	if err != nil {
-		log.Panic("Download Process Failed")
-	}
+	// process := exec.Command(ed.Binary, command...)
+	// err := process.Run()
+	// if err != nil {
+	// 	log.Panic("Download Process Failed")
+	// }
+}
+
+func (ed *ExternalDownloader) Download(url string, file string, resume bool) {
+	ed.startDownload(url, file, resume)
 }
 
 func (ed *ExternalDownloader) prepareCookies(command []string, url string) []string {
@@ -64,6 +64,14 @@ type CurlDownloader struct {
 	ExternalDownloader
 }
 
+func NewCurlDownloader(session *api.CourseraSession) *CurlDownloader {
+	const binary = "C:/Windows/System32/curl.exe"
+	c := &CurlDownloader{}
+	e := ExternalDownloader{c, session, binary}
+	c.ExternalDownloader = e
+	return c
+}
+
 func (d *CurlDownloader) createCommand(url string, file string) []string {
 	return []string{
 		url, "-k", "-#", "=L", "-o", file,
@@ -76,4 +84,8 @@ func (d *CurlDownloader) enableResume(command []string) []string {
 
 func (d *CurlDownloader) addCookies(command []string, cookies string) []string {
 	return append(command, "--cookie", cookies)
+}
+
+func GetDownloader(session *api.CourseraSession) IDownloader {
+	return NewCurlDownloader(session)
 }

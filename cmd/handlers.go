@@ -18,12 +18,20 @@ func HandleSpecialization(name string) {
 func HandleCourses(courseNames []string) {
 	fmt.Println("Downloading Courses")
 	fmt.Println(courseNames)
+	session := api.NewCourseraSession(api.CookieFile)
+	DownloadOnDemandClass(courseNames[0], session, true)
 }
 
-func DownloadOnDemandClass(cname string, session *api.CourseraSession, cache bool) {
+func DownloadOnDemandClass(className string, session *api.CourseraSession, cache bool) {
 	extractor := services.NewCourseraExtractor(session)
 	// Check if syllabus is cached - if yes, use it
-	extractor.GetModules(cname, "en")
+	modules, err := extractor.GetModules(className, "en")
+	if err != nil {
+		fmt.Println("Error getting Modules")
+	}
+	fmt.Println(len(modules.Elements))
+	downloader := services.GetDownloader(session)
+	downloader.Download("url string", "file string", false)
 }
 
 func ListCourses() {

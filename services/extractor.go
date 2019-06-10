@@ -24,12 +24,12 @@ func (e *CourseraExtractor) ListCourses() ([]types.Course, error) {
 	return course.ListCourses()
 }
 
-func (e *CourseraExtractor) GetModules(cname string, subtitle string) (*types.CourseMaterialsResponse, error) {
-	return e.getOnDemandSyllabusJSON(cname)
+func (e *CourseraExtractor) GetModules(className string, subtitle string) (*types.CourseMaterialsResponse, error) {
+	return e.getOnDemandSyllabusJSON(className)
 }
 
-func (e *CourseraExtractor) getOnDemandSyllabus(cname string) (string, error) {
-	url := fmt.Sprintf(api.CourseMaterialsURL, cname)
+func (e *CourseraExtractor) getOnDemandSyllabus(className string) (string, error) {
+	url := fmt.Sprintf(api.CourseMaterialsURL, className)
 	syl, err := e.Session.GetString(url)
 	if err != nil {
 		return "", err
@@ -38,8 +38,8 @@ func (e *CourseraExtractor) getOnDemandSyllabus(cname string) (string, error) {
 	return syl, nil
 }
 
-func (e *CourseraExtractor) getOnDemandSyllabusJSON(cname string) (*types.CourseMaterialsResponse, error) {
-	url := fmt.Sprintf(api.CourseMaterialsURL, cname)
+func (e *CourseraExtractor) getOnDemandSyllabusJSON(className string) (*types.CourseMaterialsResponse, error) {
+	url := fmt.Sprintf(api.CourseMaterialsURL, className)
 	var cmr types.CourseMaterialsResponse
 	err := e.Session.GetJSON(url, &cmr)
 	if err != nil {
