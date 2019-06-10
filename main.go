@@ -3,20 +3,19 @@ package main
 import (
 	"coursera/cmd"
 	"coursera/types"
-	"flag"
+
+	"github.com/alexflint/go-arg"
 )
 
 func main() {
-	classType := flag.String("type", "course", "Class Type - Course or Specialization")
-	var courseNames types.SArray
-	flag.Var(&courseNames, "name", "Course Name")
-	flag.Parse()
+	var args types.Arguments
+	arg.MustParse(&args)
 
-	switch *classType {
+	switch args.ClassType {
 	case "spz":
-		cmd.HandleSpecialization(courseNames[0])
+		cmd.HandleSpecialization(args.ClassNames[0])
 	case "course":
-		cmd.HandleCourses(courseNames)
+		cmd.HandleCourses(&args)
 	case "list":
 		cmd.ListCourses()
 	}

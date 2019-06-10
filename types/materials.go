@@ -6,8 +6,8 @@ type CourseMaterialsResponse struct {
 		ModuleIds []string `json:"moduleIds"`
 	} `json:"elements"`
 	Linked struct {
-		Items   []Item    `json:"onDemandCourseMaterialItems.v2"`
-		Lessons []Section `json:"onDemandCourseMaterialLessons.v1"`
-		Modules []Module  `json:"onDemandCourseMaterialModules.v1"`
+		Items   []ItemResponse    `json:"onDemandCourseMaterialItems.v2"`
+		Lessons []SectionResponse `json:"onDemandCourseMaterialLessons.v1"`
+		Modules []ModuleResponse  `json:"onDemandCourseMaterialModules.v1"`
 	} `json:"linked"`
 }

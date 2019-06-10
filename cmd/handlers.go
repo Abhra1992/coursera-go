@@ -3,35 +3,53 @@ package cmd
 import (
 	"coursera/api"
 	"coursera/services"
+	"coursera/types"
 	"fmt"
 	"log"
 )
 
+func GetSpecialization(cs *api.CourseraSession, name string) (*types.Specialization, error) {
+	url := fmt.Sprintf(api.SpecializationURL, name)
+	var sr types.SpecializationResponse
+	err := cs.GetJSON(url, &sr)
+	if err != nil {
+		return nil, err
+	}
+	spz := &types.Specialization{
+		Name:    sr.Elements[0].Name,
+		Courses: sr.Linked.Courses,
+	}
+	return spz, nil
+}
+
 func HandleSpecialization(name string) {
 	fmt.Println("Specializations")
 	session := api.NewCourseraSession(api.CookieFile)
-	sp, _ := session.GetSpecialization(name)
+	sp, _ := GetSpecialization(session, name)
 	fmt.Println(sp.Name)
 	fmt.Println(sp.Courses)
 }
 
-func HandleCourses(courseNames []string) {
-	fmt.Println("Downloading Courses")
-	fmt.Println(courseNames)
-	session := api.NewCourseraSession(api.CookieFile)
-	DownloadOnDemandClass(courseNames[0], session, true)
-}
-
-func DownloadOnDemandClass(className string, session *api.CourseraSession, cache bool) {
-	extractor := services.NewCourseraExtractor(session)
+func DownloadOnDemandClass(cs *api.CourseraSession, className string, args *types.Arguments) (bool, error) {
+	extractor := services.NewCourseraExtractor(cs)
 	// Check if syllabus is cached - if yes, use it
 	modules, err := extractor.GetModules(className, "en")
 	if err != nil {
 		fmt.Println("Error getting Modules")
 	}
-	fmt.Println(len(modules.Elements))
-	downloader := services.GetDownloader(session)
-	downloader.Download("url string", "file string", false)
+	downloader := services.GetDownloader(cs)
+	scheduler := services.NewConsecutiveScheduler(downloader)
+	workflow := services.NewCourseraWorkflow(scheduler, args, className)
+	completed, err := workflow.DownloadModules(modules)
+	return completed, err
+}
+
+func HandleCourses(args *types.Arguments) {
+	courseNames := args.ClassNames
+	fmt.Println("Downloading Courses")
+	fmt.Println(courseNames)
+	session := api.NewCourseraSession(api.CookieFile)
+	DownloadOnDemandClass(session, courseNames[0], args)
 }
 
 func ListCourses() {

@@ -9,8 +9,8 @@ import (
 )
 
 type IDownloader interface {
-	Download(url string, file string, resume bool)
-	startDownload(url string, file string, resume bool)
+	Download(url string, file string, resume bool) error
+	startDownload(url string, file string, resume bool) error
 	createCommand(url string, file string) []string
 	enableResume(command []string) []string
 	addCookies(command []string, cookies string) []string
@@ -22,7 +22,7 @@ type ExternalDownloader struct {
 	Binary  string
 }
 
-func (ed *ExternalDownloader) startDownload(url string, file string, resume bool) {
+func (ed *ExternalDownloader) startDownload(url string, file string, resume bool) error {
 	command := ed.createCommand(url, file)
 	command = ed.prepareCookies(command, url)
 	if resume {
@@ -34,10 +34,11 @@ func (ed *ExternalDownloader) startDownload(url string, file string, resume bool
 	// if err != nil {
 	// 	log.Panic("Download Process Failed")
 	// }
+	return nil
 }
 
-func (ed *ExternalDownloader) Download(url string, file string, resume bool) {
-	ed.startDownload(url, file, resume)
+func (ed *ExternalDownloader) Download(url string, file string, resume bool) error {
+	return ed.startDownload(url, file, resume)
 }
 
 func (ed *ExternalDownloader) prepareCookies(command []string, url string) []string {

@@ -1,6 +1,13 @@
 package types
 
 type Item struct {
+	ID        string
+	Name      string
+	SectionID string
+	ModuleID  string
+}
+
+type ItemResponse struct {
 	ContentSummary struct {
 		TypeName string `json:"typeName"`
 	} `json:"contentSummary"`
