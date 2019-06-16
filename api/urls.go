@@ -14,6 +14,7 @@ const MembershipsURLLimit1 = MembershipsURL + "&limit=1"
 const CourseMaterialsURL = APIBaseURL + "/onDemandCourseMaterials.v2/?q=slug&slug=%s&includes=modules,lessons,items&&fields=moduleIds,onDemandCourseMaterialModules.v1(name,slug,lessonIds,optional,learningObjectives),onDemandCourseMaterialLessons.v1(name,slug,elementIds,optional,trackId),onDemandCourseMaterialItems.v2(name,slug,contentSummary,isLocked,trackId,itemLockSummary)&showLockedItems=true"
 const LectureAssetsURL = APIBaseURL + "/onDemandLectureAssets.v1/%s~%s/?includes=openCourseAssets"
 const LectureVideosURL = APIBaseURL + "/onDemandLectureVideos.v1/%s~%s/?includes=video&fields=onDemandVideos.v1(sources,subtitles)"
+const SupplementsURL = APIBaseURL + "/onDemandSupplements.v1/{course_id}~{element_id}?includes=asset&fields=openCourseAssets.v1(typeName),openCourseAssets.v1(definition)"
 
 func MakeCourseraAbsoluteURL(link string) string {
 	linkURL, err := url.Parse(link)

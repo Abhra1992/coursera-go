@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -29,11 +31,13 @@ func (ed *ExternalDownloader) startDownload(url string, file string, resume bool
 		command = ed.enableResume(command)
 	}
 	log.Printf("Executing %s %s", ed.Binary, command)
-	// process := exec.Command(ed.Binary, command...)
-	// err := process.Run()
-	// if err != nil {
-	// 	log.Panic("Download Process Failed")
-	// }
+	process := exec.Command(ed.Binary, command...)
+	process.Stdout = os.Stdout
+	process.Stderr = os.Stderr
+	err := process.Run()
+	if err != nil {
+		log.Panic("Download Process Failed")
+	}
 	return nil
 }
 
@@ -75,7 +79,7 @@ func NewCurlDownloader(session *api.CourseraSession) *CurlDownloader {
 
 func (d *CurlDownloader) createCommand(url string, file string) []string {
 	return []string{
-		url, "-k", "-#", "=L", "-o", file,
+		url, "-k", "-#", "-L", "-o", file,
 	}
 }
 

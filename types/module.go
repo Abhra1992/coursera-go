@@ -3,6 +3,7 @@ package types
 type Module struct {
 	ID       string
 	Name     string
+	Symbol   string
 	Sections []*Section
 }
 
@@ -16,6 +17,6 @@ type ModuleResponse struct {
 
 func (mr *ModuleResponse) ToModel() *Module {
 	return &Module{
-		mr.ID, mr.Name, nil,
+		mr.ID, mr.Name, mr.Slug, nil,
 	}
 }

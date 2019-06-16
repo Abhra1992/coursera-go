@@ -80,6 +80,21 @@ func (od *CourseraOnDemand) extractSubtitlesFromVideo(vr *types.Video, videoCont
 	}
 }
 
+func (od *CourseraOnDemand) ExtractLinksFromSupplement(elementID string) (map[string]string, error) {
+	var sr types.SupplementsResponse
+	url := fmt.Sprintf(api.SupplementsURL, od.classID, elementID)
+	err := od.Session.GetJSON(url, &sr)
+	if err != nil {
+		return nil, err
+	}
+	supContent := make(map[string]string)
+	// for _, asset := range sr.Linked.Assets {
+	// 	value := asset.Definition.Value
+	// }
+	// Incomplete implementation
+	return supContent, nil
+}
+
 func getLectureAssetIDs()            {}
 func normalizeAssets()               {}
 func extendSupplementLinks()         {}

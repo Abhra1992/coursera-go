@@ -3,7 +3,7 @@ package services
 import "log"
 
 type IDownloadScheduler interface {
-	Download(url string) (string, error)
+	Download(url string, file string) (string, error)
 	Join(url string) error
 }
 
@@ -12,8 +12,8 @@ type AbstractScheduler struct {
 	downloader IDownloader
 }
 
-func (as *AbstractScheduler) downloadWrapper(url string) (string, error) {
-	err := as.downloader.Download(url, "file", true)
+func (as *AbstractScheduler) downloadWrapper(url string, file string) (string, error) {
+	err := as.downloader.Download(url, file, true)
 	return url, err
 }
 
@@ -28,10 +28,11 @@ func NewConsecutiveScheduler(d IDownloader) *ConsecutiveScheduler {
 	return cs
 }
 
-func (cs *ConsecutiveScheduler) Download(url string) (string, error) {
-	res, err := cs.downloadWrapper(url)
+func (cs *ConsecutiveScheduler) Download(url string, file string) (string, error) {
+	res, err := cs.downloadWrapper(url, file)
 	return res, err
 }
+
 func (cs *ConsecutiveScheduler) Join(url string) error {
 	log.Println("Join is not applicable to ConsecutiveScheduler")
 	return nil

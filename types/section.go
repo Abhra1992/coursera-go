@@ -3,6 +3,7 @@ package types
 type Section struct {
 	ID       string
 	Name     string
+	Symbol   string
 	Items    []*Item
 	ModuleID string
 }
@@ -19,6 +20,6 @@ type SectionResponse struct {
 
 func (sr *SectionResponse) ToModel() *Section {
 	return &Section{
-		sr.ID, sr.Name, nil, sr.ModuleID,
+		sr.ID, sr.Name, sr.Slug, nil, sr.ModuleID,
 	}
 }

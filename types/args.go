@@ -9,7 +9,7 @@ type Arguments struct {
 	Jobs             int
 	Delay            int
 	Preview          bool
-	Path             string
+	Path             string `arg:"-p" help:"Download Path"`
 	SubtitleLanguage string `arg:"-l" help:"Subtitle Language"`
 	Resolution       string `arg:"-r" help:"Resolution"`
 	// Selection

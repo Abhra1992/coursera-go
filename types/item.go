@@ -5,6 +5,7 @@ import "strings"
 type Item struct {
 	ID        string
 	Name      string
+	Symbol    string
 	SectionID string
 	ModuleID  string
 	Type      string
@@ -32,6 +33,6 @@ type ItemResponse struct {
 
 func (ir *ItemResponse) ToModel() *Item {
 	return &Item{
-		ir.ID, ir.Name, ir.LessonID, ir.ModuleID, strings.Title(ir.ContentSummary.TypeName), nil,
+		ir.ID, ir.Name, ir.Slug, ir.LessonID, ir.ModuleID, strings.Title(ir.ContentSummary.TypeName), nil,
 	}
 }

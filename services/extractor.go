@@ -84,6 +84,10 @@ func (e *CourseraExtractor) fillSectionItems(sr *types.SectionResponse, cm *type
 	for _, iid := range sr.ItemIds {
 		ir := allItems[iid]
 		log.Printf("\t\t%s Item [%s] [%s]", strings.Title(ir.ContentSummary.TypeName), ir.ID, ir.Name)
+		if ir.IsLocked {
+			log.Printf("\t\t\t[Locked] Reason: %s", ir.ItemLockSummary.LockState.ReasonCode)
+			continue
+		}
 		item, err := e.fillItemLinks(ir, course)
 		if err != nil {
 			return nil, err
@@ -123,7 +127,9 @@ func (e *CourseraExtractor) fillItemLinks(ir *types.ItemResponse, course *Course
 	switch item.Type {
 	case "Lecture":
 		links, _ = course.ExtractLinksFromLecture(item.ID)
-	case "Supplement", "PhasedPeer", "GradedProgramming", "UngradedProgramming":
+	case "Supplement":
+		links, _ = course.ExtractLinksFromSupplement(item.ID)
+	case "PhasedPeer", "GradedProgramming", "UngradedProgramming":
 	case "Quiz", "Exam", "Programming", "Notebook":
 	default:
 		log.Printf("Unsupported type %s in Item %s %s", item.Type, item.Name, item.ID)
