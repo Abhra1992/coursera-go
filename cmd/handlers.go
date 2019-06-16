@@ -31,9 +31,9 @@ func HandleSpecialization(name string) {
 }
 
 func DownloadOnDemandClass(cs *api.CourseraSession, className string, args *types.Arguments) (bool, error) {
-	extractor := services.NewCourseraExtractor(cs)
+	extractor := services.NewCourseraExtractor(cs, args)
 	// Check if syllabus is cached - if yes, use it
-	modules, err := extractor.GetModules(className, "en")
+	modules, err := extractor.GetModules(className)
 	if err != nil {
 		fmt.Println("Error getting Modules")
 	}
@@ -52,9 +52,9 @@ func HandleCourses(args *types.Arguments) {
 	DownloadOnDemandClass(session, courseNames[0], args)
 }
 
-func ListCourses() {
+func ListCourses(args *types.Arguments) {
 	session := api.NewCourseraSession(api.CookieFile)
-	extractor := services.NewCourseraExtractor(session)
+	extractor := services.NewCourseraExtractor(session, args)
 	courses, err := extractor.ListCourses()
 	if err != nil {
 		log.Panicf("Could not list courses")

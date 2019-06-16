@@ -17,6 +17,6 @@ func main() {
 	case "course":
 		cmd.HandleCourses(&args)
 	case "list":
-		cmd.ListCourses()
+		cmd.ListCourses(&args)
 	}
 }

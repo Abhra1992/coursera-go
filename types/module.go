@@ -3,7 +3,7 @@ package types
 type Module struct {
 	ID       string
 	Name     string
-	Sections []Section
+	Sections []*Section
 }
 
 type ModuleResponse struct {

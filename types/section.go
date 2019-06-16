@@ -3,7 +3,7 @@ package types
 type Section struct {
 	ID       string
 	Name     string
-	Items    []Item
+	Items    []*Item
 	ModuleID string
 }
 
@@ -15,4 +15,10 @@ type SectionResponse struct {
 	Name       string   `json:"name"`
 	Slug       string   `json:"slug"`
 	TrackID    string   `json:"trackId"`
+}
+
+func (sr *SectionResponse) ToModel() *Section {
+	return &Section{
+		sr.ID, sr.Name, nil, sr.ModuleID,
+	}
 }

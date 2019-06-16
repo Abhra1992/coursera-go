@@ -10,7 +10,8 @@ type Arguments struct {
 	Delay            int
 	Preview          bool
 	Path             string
-	SubtitleLanguage string
+	SubtitleLanguage string `arg:"-l" help:"Subtitle Language"`
+	Resolution       string `arg:"-r" help:"Resolution"`
 	// Selection
 	OnlySyllabus      bool
 	DownloadQuizzes   bool

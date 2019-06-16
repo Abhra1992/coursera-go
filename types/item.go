@@ -1,10 +1,14 @@
 package types
 
+import "strings"
+
 type Item struct {
 	ID        string
 	Name      string
 	SectionID string
 	ModuleID  string
+	Type      string
+	Links     map[string]string
 }
 
 type ItemResponse struct {
@@ -24,4 +28,10 @@ type ItemResponse struct {
 	Name     string `json:"name"`
 	Slug     string `json:"slug"`
 	TrackID  string `json:"trackId"`
+}
+
+func (ir *ItemResponse) ToModel() *Item {
+	return &Item{
+		ir.ID, ir.Name, ir.LessonID, ir.ModuleID, strings.Title(ir.ContentSummary.TypeName), nil,
+	}
 }
