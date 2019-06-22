@@ -14,6 +14,7 @@ type Arguments struct {
 	Resolution       string `arg:"-r" help:"Resolution"`
 	// Selection
 	OnlySyllabus      bool
+	CacheSyllabus     bool
 	DownloadQuizzes   bool
 	DownloadNotebooks bool
 	Formats           []string
