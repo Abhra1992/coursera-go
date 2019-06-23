@@ -1,60 +1,108 @@
 package services
 
 import (
+	"coursera/api"
 	"coursera/types"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 )
 
+// CourseraWorkflow sets up the workflow for downloading Coursera class resources
 type CourseraWorkflow struct {
-	scheduler IDownloadScheduler
-	args      *types.Arguments
-	className string
+	scheduler   IDownloadScheduler
+	args        *types.Arguments
+	className   string
+	skippedURLs []string
+	failedURLs  []string
 }
 
+// NewCourseraWorkflow constructor
 func NewCourseraWorkflow(dw IDownloadScheduler, args *types.Arguments, className string) *CourseraWorkflow {
-	return &CourseraWorkflow{dw, args, className}
+	return &CourseraWorkflow{dw, args, className, make([]string, 0), make([]string, 0)}
 }
 
+// DownloadModules downloads the modules in the Coursera class
 func (cw *CourseraWorkflow) DownloadModules(modules []*types.Module) (bool, error) {
-	xpath := "."
-	if cw.args.Path != "" {
-		xpath = cw.args.Path
-	}
-	cpath := filepath.Join(xpath, cw.className)
-	if err := ensureDirExists(cpath); err != nil {
+	_, cpath, err := cw.resolveEnsureExecutionPaths()
+	if err != nil {
 		return false, err
 	}
 	for _, module := range modules {
 		log.Printf("MODULE %s", module.Name)
+		lastUpdate := time.Time{}
 		for _, section := range module.Sections {
 			log.Printf("\tSECTION %s", section.Name)
 			spath := filepath.Join(cpath, module.Symbol, section.Symbol)
-			if err := ensureDirExists(spath); err != nil {
+			if err := EnsureDirExists(spath); err != nil {
 				return false, err
 			}
 			for ii, item := range section.Items {
 				log.Printf("\t\t%s ITEM %s", item.Type, item.Symbol)
 				for ext, link := range item.Links {
 					fname := filepath.Join(spath, fmt.Sprintf("%02d-%s.%s", ii, item.Symbol, ext))
-					cw.scheduler.Download(link, fname)
+					cw.handleResource(link, ext, fname, lastUpdate)
 				}
 			}
 		}
 	}
-	return true, nil
+	err = cw.scheduler.Join()
+	return true, err
 }
-
-func ensureDirExists(dirName string) error {
-	err := os.MkdirAll(dirName, os.ModePerm)
-	if err == nil || os.IsExist(err) {
-		return nil
+func (cw *CourseraWorkflow) resolveEnsureExecutionPaths() (string, string, error) {
+	xpath := "."
+	if cw.args.Path != "" {
+		xpath = cw.args.Path
 	}
-	return err
+	cpath := filepath.Join(xpath, cw.className)
+	if err := EnsureDirExists(cpath); err != nil {
+		return "", "", err
+	}
+	return xpath, cpath, nil
 }
 
-func (cw *CourseraWorkflow) HandleResource() {
-
+func (cw *CourseraWorkflow) handleResource(link string, format string, fname string, lastUpdate time.Time) (time.Time, error) {
+	overwrite, resume, skipDownload := cw.args.Overwrite, cw.args.Resume, cw.args.SkipDownload
+	exists, err := FileExists(fname)
+	if err != nil {
+		return lastUpdate, err
+	}
+	if overwrite || resume || !exists {
+		if !skipDownload {
+			if strings.HasPrefix(link, api.InMemoryMarker) {
+				pageContent := strings.TrimPrefix(link, api.InMemoryMarker)
+				log.Printf("Saving page contents to: %s", fname)
+				ioutil.WriteFile(fname, []byte(pageContent), 0644)
+			} else if cw.skippedURLs != nil && shouldSkipFormatURL(format, link) {
+				cw.skippedURLs = append(cw.skippedURLs, link)
+			} else {
+				cw.scheduler.Download(link, fname)
+			}
+		} else {
+			// touch file
+			f, err := os.OpenFile(fname, os.O_CREATE, 0644)
+			if err != nil {
+				log.Printf("Could not touch file [%s]", fname)
+			}
+			f.Close()
+		}
+		lastUpdate = time.Now()
+	} else {
+		log.Printf("\t\t> Exists [%s]", fname)
+		fi, err := os.Stat(fname)
+		if err != nil {
+			return lastUpdate, err
+		}
+		mtime := fi.ModTime()
+		if mtime.After(lastUpdate) {
+			lastUpdate = mtime
+		}
+	}
+	return lastUpdate, nil
 }
+
+func (cw *CourseraWorkflow) runHooks() {}

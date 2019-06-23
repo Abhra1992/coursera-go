@@ -1,5 +1,6 @@
 package types
 
+// CourseMaterialsResponse API response for course materials
 type CourseMaterialsResponse struct {
 	Elements []struct {
 		ID        string   `json:"id"`
@@ -12,6 +13,7 @@ type CourseMaterialsResponse struct {
 	} `json:"linked"`
 }
 
+// GetItemCollection items in the course materials
 func (cm *CourseMaterialsResponse) GetItemCollection() map[string]*ItemResponse {
 	imap := make(map[string]*ItemResponse)
 	size := len(cm.Linked.Items)
@@ -22,6 +24,7 @@ func (cm *CourseMaterialsResponse) GetItemCollection() map[string]*ItemResponse 
 	return imap
 }
 
+// GetSectionCollection sections in the course materials
 func (cm *CourseMaterialsResponse) GetSectionCollection() map[string]*SectionResponse {
 	smap := make(map[string]*SectionResponse)
 	size := len(cm.Linked.Lessons)
@@ -32,6 +35,7 @@ func (cm *CourseMaterialsResponse) GetSectionCollection() map[string]*SectionRes
 	return smap
 }
 
+// GetModuleCollection modules in the course materials
 func (cm *CourseMaterialsResponse) GetModuleCollection() map[string]*ModuleResponse {
 	mmap := make(map[string]*ModuleResponse)
 	size := len(cm.Linked.Modules)

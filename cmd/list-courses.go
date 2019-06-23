@@ -8,6 +8,7 @@ import (
 	"log"
 )
 
+// ListCourses lists the courses in which the user is enrolled
 func ListCourses(args *types.Arguments) {
 	session := api.NewCourseraSession(api.CookieFile)
 	extractor := services.NewCourseraExtractor(session, args)

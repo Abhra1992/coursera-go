@@ -1,5 +1,13 @@
 package types
 
+// Resource model for an item resource
+type Resource struct {
+	Name      string
+	Link      string
+	Extension string
+}
+
+// SupplementsResponse API reponse for an item supplement
 type SupplementsResponse struct {
 	Elements []struct {
 		CourseID string `json:"courseId"`

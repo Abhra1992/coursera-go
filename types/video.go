@@ -5,12 +5,14 @@ import (
 	"sort"
 )
 
+// Video model for an item video
 type Video struct {
 	ID        string            `json:"id"`
 	Source    VideoSource       `json:"sources"`
 	Subtitles map[string]string `json:"subtitles"`
 }
 
+// GetBestDownload determines the best quality video available
 func (v *Video) GetBestDownload() (*VideoDownload, error) {
 	res := v.Source.Resolution
 	available := len(res)
@@ -25,11 +27,13 @@ func (v *Video) GetBestDownload() (*VideoDownload, error) {
 	return res[keys[0]], nil
 }
 
+// VideoDownload model for a downloadable video uri
 type VideoDownload struct {
 	Mp4VideoURL  string `json:"mp4VideoUrl"`
 	WebMVideoURL string `json:"webMVideoUrl"`
 }
 
+// VideoSource model for a downloadable video source
 type VideoSource struct {
 	Resolution map[string]*VideoDownload `json:"byResolution"`
 	Playlist   struct {
@@ -38,6 +42,7 @@ type VideoSource struct {
 	} `json:"playlists"`
 }
 
+// LectureVideosResponse API reponse for a lecture video
 type LectureVideosResponse struct {
 	Elements []struct {
 		CourseID string `json:"courseId"`

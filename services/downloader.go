@@ -2,8 +2,10 @@ package services
 
 import (
 	"coursera/api"
+	"coursera/types"
 )
 
+// IDownloader represents the interface of a resource downloader
 type IDownloader interface {
 	Download(url string, file string, resume bool) error
 	startDownload(url string, file string, resume bool) error
@@ -12,6 +14,7 @@ type IDownloader interface {
 	addCookies(command []string, cookies string) []string
 }
 
-func GetDownloader(session *api.CourseraSession) IDownloader {
+// GetDownloader instantiates a default downloader for the session
+func GetDownloader(session *api.CourseraSession, args *types.Arguments) IDownloader {
 	return NewCurlDownloader(session)
 }

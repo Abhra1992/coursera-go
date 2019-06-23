@@ -2,10 +2,12 @@ package services
 
 import "coursera/api"
 
+// CurlDownloader uses the curl tool to download files
 type CurlDownloader struct {
 	ExternalDownloader
 }
 
+// NewCurlDownloader creates a new curl download session
 func NewCurlDownloader(session *api.CourseraSession) *CurlDownloader {
 	const binary = "C:/Windows/System32/curl.exe"
 	c := &CurlDownloader{}

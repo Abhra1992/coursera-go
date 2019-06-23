@@ -1,5 +1,6 @@
 package types
 
+// MembershipsResponse API response for course enrolments
 type MembershipsResponse struct {
 	Elements []struct {
 		CourseID string `json:"courseId"`

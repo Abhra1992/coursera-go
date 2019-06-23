@@ -1,5 +1,6 @@
 package types
 
+// Arguments command line arguments
 type Arguments struct {
 	// Basic
 	ClassType        string   `arg:"-t" help:"Class Type - Course or Specialization"`

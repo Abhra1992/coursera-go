@@ -8,24 +8,29 @@ import (
 	"strings"
 )
 
-type Extractor interface {
+// IExtractor represents the interface for a url extractor from an API
+type IExtractor interface {
 	GetModules() []string
 }
 
+// CourseraExtractor extracts links from the Coursera API
 type CourseraExtractor struct {
 	Session *api.CourseraSession
 	args    *types.Arguments
 }
 
+// NewCourseraExtractor creates a new Coursera Extractor
 func NewCourseraExtractor(session *api.CourseraSession, args *types.Arguments) *CourseraExtractor {
 	return &CourseraExtractor{Session: session, args: args}
 }
 
+// ListCourses list the courses the user has enrolled in
 func (e *CourseraExtractor) ListCourses() ([]types.Course, error) {
 	course := NewCourseraOnDemand(e.Session, "", e.args)
 	return course.ListCourses()
 }
 
+// GetModules get the modules for a given class
 func (e *CourseraExtractor) GetModules(className string) ([]*types.Module, error) {
 	syl, err := e.getOnDemandSyllabus(className)
 	if err != nil {
@@ -38,7 +43,7 @@ func (e *CourseraExtractor) GetModules(className string) ([]*types.Module, error
 	return modules, nil
 }
 
-// DEPRECATED
+// Deprecated: Superseded by getOnDemandSyllabus
 func (e *CourseraExtractor) getOnDemandSyllabusString(className string) (string, error) {
 	url := fmt.Sprintf(api.CourseMaterialsURL, className)
 	syl, err := e.Session.GetString(url)
@@ -94,7 +99,7 @@ func (e *CourseraExtractor) fillSectionItems(sr *types.SectionResponse, cm *type
 		}
 		if item.Links != nil {
 			for key, link := range item.Links {
-				log.Printf("\t\t\t [%s] %s...", key, link[:50])
+				log.Printf("\t\t\t [%s] %s...", key, link[:80])
 			}
 		}
 		items = append(items, item)

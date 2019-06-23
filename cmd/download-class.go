@@ -8,32 +8,37 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 )
 
+// DownloadOnDemandClass downloads a single Coursera On Demand class
 func DownloadOnDemandClass(cs *api.CourseraSession, className string, args *types.Arguments) (bool, error) {
 	extractor := services.NewCourseraExtractor(cs, args)
+	var modules []*types.Module
 	// Check if syllabus is cached - if yes, use it
 	sf := fmt.Sprintf("%s-syllabus.json", className)
-	exists, err := fileExists(sf)
-	if err != nil {
-		log.Printf("Error when checking for existence of syllabus for %s", className)
-		return false, err
-	}
-	var modules []*types.Module
-	if args.CacheSyllabus && exists {
-		syl, err := ioutil.ReadFile(sf)
+	if args.CacheSyllabus {
+		syllabusExists, err := services.FileExists(sf)
 		if err != nil {
-			log.Printf("Could not read syllabus for %s", className)
+			log.Printf("Error when checking for existence of syllabus for %s", className)
 			return false, err
 		}
-		json.Unmarshal(syl, &modules)
-	} else {
-		modules, err = extractor.GetModules(className)
+		if syllabusExists {
+			syl, err := ioutil.ReadFile(sf)
+			if err != nil {
+				log.Printf("Could not read syllabus for %s", className)
+				return false, err
+			}
+			json.Unmarshal(syl, &modules)
+		}
+	}
+	if modules == nil {
+		ems, err := extractor.GetModules(className)
+		modules = ems
 		if err != nil {
 			fmt.Println("Error getting Modules")
 		}
 	}
+	// Check if syllabus should be cached - if yes, save it
 	if args.CacheSyllabus {
 		jsyl, err := json.Marshal(modules)
 		if err != nil {
@@ -45,20 +50,9 @@ func DownloadOnDemandClass(cs *api.CourseraSession, className string, args *type
 	if args.OnlySyllabus {
 		return true, nil
 	}
-	downloader := services.GetDownloader(cs)
+	downloader := services.GetDownloader(cs, args)
 	scheduler := services.NewConsecutiveScheduler(downloader)
 	workflow := services.NewCourseraWorkflow(scheduler, args, className)
 	completed, err := workflow.DownloadModules(modules)
 	return completed, err
-}
-
-func fileExists(fname string) (bool, error) {
-	_, err := os.Stat(fname)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return true, err
 }

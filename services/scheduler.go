@@ -1,10 +1,12 @@
 package services
 
+// IDownloadScheduler represents the interface for a download task scheduler
 type IDownloadScheduler interface {
 	Download(url string, file string) (string, error)
-	Join(url string) error
+	Join() error
 }
 
+// AbstractScheduler represents an absctract download scheduler
 type AbstractScheduler struct {
 	IDownloadScheduler
 	downloader IDownloader
