@@ -40,7 +40,7 @@ func DownloadOnDemandClass(cs *api.CourseraSession, className string, args *type
 	}
 	// Check if syllabus should be cached - if yes, save it
 	if args.CacheSyllabus {
-		jsyl, err := json.Marshal(modules)
+		jsyl, err := json.MarshalIndent(modules, "", "\t")
 		if err != nil {
 			log.Printf("Could not cache syllabus for %s", className)
 			return false, err

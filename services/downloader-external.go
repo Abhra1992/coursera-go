@@ -23,7 +23,7 @@ func (ed *ExternalDownloader) startDownload(url string, file string, resume bool
 	if resume {
 		command = ed.enableResume(command)
 	}
-	log.Printf("\t\t> Downloading [%s] => [%s]", url[:80], file)
+	log.Printf("\t\t> Downloading [%s...] => [%s]", url[:80], file)
 	// log.Printf("Executing %s %s", ed.Binary, command)
 	// process := exec.Command(ed.Binary, command...)
 	// process.Stdout = os.Stdout

@@ -6,6 +6,11 @@ type Asset struct {
 	URL string `json:"url"`
 }
 
+// AssetResponse API response for supplement assets
+type AssetResponse struct {
+	Assets []*Asset `json:"elements"`
+}
+
 // AssetDefinition API Reponse fragment for asset DTD
 type AssetDefinition struct {
 	ID        string `goquery:"asset,[id]"`
@@ -13,7 +18,14 @@ type AssetDefinition struct {
 	Extension string `goquery:"asset,[extension]"`
 }
 
-// AssetResponse API response for supplement assets
-type AssetResponse struct {
-	Assets []*Asset `json:"elements"`
+// Anchor model for supplement anchors
+type Anchor struct {
+	Text string `goquery:"a,text"`
+	Href string `goquery:"a,[href]"`
+}
+
+// AssetPage model for asset html fragment
+type AssetPage struct {
+	Assets  []AssetDefinition `goquery:"co-content"`
+	Anchors []Anchor          `goquery:"a"`
 }

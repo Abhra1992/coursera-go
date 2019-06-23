@@ -97,9 +97,9 @@ func (e *CourseraExtractor) fillSectionItems(sr *types.SectionResponse, cm *type
 		if err != nil {
 			return nil, err
 		}
-		if item.Links != nil {
-			for key, link := range item.Links {
-				log.Printf("\t\t\t [%s] %s...", key, link[:80])
+		if item.Resources != nil {
+			for _, res := range item.Resources {
+				log.Printf("\t\t\t [%s] %s...", res.Extension, res.Link[:80])
 			}
 		}
 		items = append(items, item)
@@ -128,17 +128,19 @@ func (e *CourseraExtractor) fillModuleSections(mr *types.ModuleResponse, cm *typ
 
 func (e *CourseraExtractor) fillItemLinks(ir *types.ItemResponse, course *CourseraOnDemand) (*types.Item, error) {
 	item := ir.ToModel()
-	var links map[string]string
+	var resx []*types.Resource
 	switch item.Type {
 	case "Lecture":
-		links, _ = course.ExtractLinksFromLecture(item.ID)
+		resmap, _ := course.ExtractLinksFromLecture(item.ID)
+		resmap.enrich(&resx)
 	case "Supplement":
-		links, _ = course.ExtractLinksFromSupplement(item.ID)
+		resmap, _ := course.ExtractLinksFromSupplement(item.ID)
+		resmap.enrich(&resx)
 	case "PhasedPeer", "GradedProgramming", "UngradedProgramming":
 	case "Quiz", "Exam", "Programming", "Notebook":
 	default:
 		log.Printf("Unsupported type %s in Item %s %s", item.Type, item.Name, item.ID)
 	}
-	item.Links = links
+	item.Resources = resx
 	return item, nil
 }

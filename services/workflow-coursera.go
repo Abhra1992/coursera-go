@@ -43,9 +43,9 @@ func (cw *CourseraWorkflow) DownloadModules(modules []*types.Module) (bool, erro
 			}
 			for ii, item := range section.Items {
 				log.Printf("\t\t%s ITEM %s", item.Type, item.Symbol)
-				for ext, link := range item.Links {
-					fname := filepath.Join(spath, fmt.Sprintf("%02d-%s.%s", ii, item.Symbol, ext))
-					cw.handleResource(link, ext, fname, lastUpdate)
+				for _, res := range item.Resources {
+					fname := filepath.Join(spath, fmt.Sprintf("%02d-%s.%s", ii, item.Symbol, res.Extension))
+					cw.handleResource(res.Link, res.Extension, fname, lastUpdate)
 				}
 			}
 		}

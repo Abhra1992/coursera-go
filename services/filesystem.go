@@ -28,3 +28,9 @@ func CleanFileName(fname string) string {
 	// Copy from python utils
 	return fname
 }
+
+// CleanURL cleans invalid characters from URL
+func CleanURL(link string) string {
+	// Copy from python utils
+	return link
+}

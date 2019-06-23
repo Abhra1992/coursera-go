@@ -10,7 +10,7 @@ type Item struct {
 	SectionID string
 	ModuleID  string
 	Type      string
-	Links     map[string]string
+	Resources []*Resource
 }
 
 // ItemResponse API response for a section item
