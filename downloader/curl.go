@@ -9,7 +9,7 @@ type Curl struct {
 
 // NewCurl creates a new curl download session
 func NewCurl(session *api.Session) *Curl {
-	const binary = "C:/Windows/System32/curl.exe"
+	const binary = "curl"
 	c := &Curl{}
 	e := ExternalDownloader{c, session, binary}
 	c.ExternalDownloader = e

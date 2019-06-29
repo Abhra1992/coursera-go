@@ -7,7 +7,7 @@ import (
 
 const (
 	// CookieFile location for user cookies
-	CookieFile = "D:/Coursera/cookies.txt"
+	CookieFile = "cookies.txt"
 
 	// HostBaseURL base url for Coursera host
 	HostBaseURL = "https://api.coursera.org"

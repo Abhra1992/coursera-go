@@ -13,7 +13,7 @@ func main() {
 
 	switch args.ClassType {
 	case "spz":
-		cmd.HandleSpecialization(args.ClassNames[0])
+		cmd.HandleSpecialization(&args)
 	case "course":
 		cmd.HandleCourses(&args)
 	case "list":

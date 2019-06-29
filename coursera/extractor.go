@@ -26,22 +26,22 @@ func NewExtractor(session *api.Session, args *types.Arguments) *Extractor {
 }
 
 // ListCourses list the courses the user has enrolled in
-func (e *Extractor) ListCourses() ([]types.Course, error) {
+func (e *Extractor) ListCourses() ([]types.CourseResponse, error) {
 	course := NewOnDemand(e.Session, "", e.args)
 	return course.ListCourses()
 }
 
 // GetCourse get the syllabus for a given class
-func (e *Extractor) GetCourse(className string) ([]*types.Module, error) {
+func (e *Extractor) GetCourse(className string) (*types.Course, error) {
 	syl, err := e.getOnDemandSyllabus(className)
 	if err != nil {
 		return nil, err
 	}
-	modules, err := e.parseOnDemandSyllabus(className, syl)
+	course, err := e.parseOnDemandSyllabus(className, syl)
 	if err != nil {
 		return nil, err
 	}
-	return modules, nil
+	return course, nil
 }
 
 func (e *Extractor) getOnDemandSyllabus(className string) (*types.CourseMaterialsResponse, error) {
@@ -54,21 +54,25 @@ func (e *Extractor) getOnDemandSyllabus(className string) (*types.CourseMaterial
 	return &cmr, nil
 }
 
-func (e *Extractor) parseOnDemandSyllabus(className string, cm *types.CourseMaterialsResponse) ([]*types.Module, error) {
+func (e *Extractor) parseOnDemandSyllabus(className string, cm *types.CourseMaterialsResponse) (*types.Course, error) {
+	if len(cm.Elements) == 0 {
+		return nil, nil
+	}
 	classID := cm.Elements[0].ID
 	color.Green("Syllabus for Course %s", classID)
-	course := NewOnDemand(e.Session, classID, e.args)
+	od := NewOnDemand(e.Session, classID, e.args)
 	var modules []*types.Module
 	allModules := cm.GetModuleCollection()
 	for _, mr := range allModules {
 		color.Yellow("Module [%s] [%s]", mr.ID, mr.Name)
-		module, err := e.fillModuleSections(mr, cm, course)
+		module, err := e.fillModuleSections(mr, cm, od)
 		if err != nil {
 			return nil, err
 		}
 		modules = append(modules, module)
 	}
-	return modules, nil
+	course := &types.Course{ID: classID, Name: className, Symbol: className, Modules: modules}
+	return course, nil
 }
 
 func (e *Extractor) fillSectionItems(sr *types.SectionResponse, cm *types.CourseMaterialsResponse,

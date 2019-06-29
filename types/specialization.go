@@ -3,7 +3,7 @@ package types
 // Specialization model for a specialization
 type Specialization struct {
 	Name    string
-	Courses []Course
+	Courses []CourseResponse
 }
 
 // SpecializationResponse API response for a specialization
@@ -15,6 +15,6 @@ type SpecializationResponse struct {
 		Slug      string   `json:"slug"`
 	} `json:"elements"`
 	Linked struct {
-		Courses []Course `json:"courses.v1"`
+		Courses []CourseResponse `json:"courses.v1"`
 	} `json:"linked"`
 }

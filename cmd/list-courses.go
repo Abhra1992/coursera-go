@@ -1,16 +1,18 @@
 package cmd
 
 import (
+	"fmt"
+	"log"
+	"path"
 	"sensei/api"
 	"sensei/coursera"
 	"sensei/types"
-	"fmt"
-	"log"
 )
 
 // ListCourses lists the courses in which the user is enrolled
 func ListCourses(args *types.Arguments) {
-	session := api.NewSession(api.CookieFile)
+	cf := path.Join(args.Path, api.CookieFile)
+	session := api.NewSession(cf)
 	extractor := coursera.NewExtractor(session, args)
 	courses, err := extractor.ListCourses()
 	if err != nil {

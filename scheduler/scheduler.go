@@ -22,8 +22,3 @@ func (as *Scheduler) schedule(url string, file string) (string, error) {
 	err := as.downloader.Download(url, file, as.args.Resume)
 	return url, err
 }
-
-// Create instantiates a default scheduler for the downloader
-func Create(fd downloader.IDownloader, args *types.Arguments) IScheduler {
-	return NewParallelScheduler(fd, args)
-}

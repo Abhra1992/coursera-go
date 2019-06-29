@@ -36,7 +36,7 @@ func (od *OnDemand) ObtainUserID() (int, error) {
 }
 
 // ListCourses lists the courses the user is enrolled in
-func (od *OnDemand) ListCourses() ([]types.Course, error) {
+func (od *OnDemand) ListCourses() ([]types.CourseResponse, error) {
 	var mr types.MembershipsResponse
 	err := od.Session.GetJSON(api.MembershipsURL, &mr)
 	if err != nil {
@@ -93,9 +93,16 @@ func (od *OnDemand) ExtractLinksFromSupplement(elementID string) (ResourceGroup,
 func (od *OnDemand) extractMediaFromVideo(vr *types.Video, videoContent ResourceGroup) {
 	if vr.Source.Resolution != nil {
 		res := od.args.Resolution
-		if link, ok := vr.Source.Resolution[res]; ok {
-			res := &types.Resource{Name: vr.ID, Link: link.Mp4VideoURL, Extension: "mp4"}
-			videoContent["mp4"] = append(videoContent["mp4"], res)
+		if res == "" {
+			if link, err := vr.GetBestDownload(); err == nil && link != nil {
+				res := &types.Resource{Name: vr.ID, Link: link.Mp4VideoURL, Extension: "mp4"}
+				videoContent["mp4"] = append(videoContent["mp4"], res)
+			}
+		} else {
+			if link, ok := vr.Source.Resolution[res]; ok {
+				res := &types.Resource{Name: vr.ID, Link: link.Mp4VideoURL, Extension: "mp4"}
+				videoContent["mp4"] = append(videoContent["mp4"], res)
+			}
 		}
 	}
 }
@@ -103,6 +110,9 @@ func (od *OnDemand) extractMediaFromVideo(vr *types.Video, videoContent Resource
 func (od *OnDemand) extractSubtitlesFromVideo(vr *types.Video, videoContent ResourceGroup) {
 	if vr.Subtitles != nil {
 		lang := od.args.SubtitleLanguage
+		if lang == "" {
+			lang = "en"
+		}
 		if link, ok := vr.Subtitles[lang]; ok {
 			res := &types.Resource{Name: vr.ID, Link: api.MakeCourseraAbsoluteURL(link), Extension: "srt"}
 			videoContent["srt"] = append(videoContent["srt"], res)

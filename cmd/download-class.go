@@ -7,7 +7,6 @@ import (
 	"path"
 	"sensei/api"
 	"sensei/coursera"
-	"sensei/downloader"
 	"sensei/scheduler"
 	"sensei/services"
 	"sensei/types"
@@ -17,7 +16,7 @@ import (
 
 // DownloadOnDemandClass downloads a single Coursera On Demand class
 func DownloadOnDemandClass(cs *api.Session, className string, args *types.Arguments) (bool, error) {
-	var modules []*types.Module
+	var course *types.Course
 	// Check if syllabus is cached - if yes, use it
 	sf := path.Join(args.Path, fmt.Sprintf("%s-syllabus.json", className))
 	if args.CacheSyllabus {
@@ -32,21 +31,23 @@ func DownloadOnDemandClass(cs *api.Session, className string, args *types.Argume
 				color.Red("Could not read syllabus for %s", className)
 				return false, err
 			}
-			json.Unmarshal(syl, &modules)
+			json.Unmarshal(syl, &course)
 		}
 	}
-	if modules == nil {
+	// If no cached syllabus is found, generate the syllabus
+	if course == nil {
 		// TODO: this extractor step can go inside workflow
 		ce := coursera.NewExtractor(cs, args)
 		ems, err := ce.GetCourse(className)
-		modules = ems
-		if err != nil {
-			color.Red("Error getting Modules")
+		if err != nil || ems == nil {
+			color.Red("Could not get course syllabus")
+			return false, err
 		}
+		course = ems
 	}
 	// Check if syllabus should be cached - if yes, save it
 	if args.CacheSyllabus {
-		jsyl, err := json.MarshalIndent(modules, "", "\t")
+		jsyl, err := json.MarshalIndent(course, "", "\t")
 		if err != nil {
 			color.Red("Could not cache syllabus for %s", className)
 			return false, err
@@ -56,9 +57,8 @@ func DownloadOnDemandClass(cs *api.Session, className string, args *types.Argume
 	if args.OnlySyllabus {
 		return true, nil
 	}
-	fd := downloader.Create(cs, args)
-	ts := scheduler.Create(fd, args)
+	ts := scheduler.Create(cs, args)
 	workflow := coursera.NewWorkflow(ts, args, className)
-	completed, err := workflow.DownloadCourse(modules)
+	completed, err := workflow.DownloadCourse(course)
 	return completed, err
 }

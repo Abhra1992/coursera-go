@@ -31,12 +31,12 @@ func NewWorkflow(dw scheduler.IScheduler, args *types.Arguments, className strin
 }
 
 // DownloadCourse downloads the Coursera class from the syllabus
-func (cw *Workflow) DownloadCourse(modules []*types.Module) (bool, error) {
+func (cw *Workflow) DownloadCourse(course *types.Course) (bool, error) {
 	_, cpath, err := cw.resolveEnsureExecutionPaths()
 	if err != nil {
 		return false, err
 	}
-	for _, module := range modules {
+	for _, module := range course.Modules {
 		color.Yellow("MODULE %s", module.Name)
 		lastUpdate := time.Time{}
 		for _, section := range module.Sections {
@@ -91,13 +91,13 @@ func (cw *Workflow) handleResource(link string, format string, fname string, las
 			// touch file
 			f, err := os.OpenFile(fname, os.O_CREATE, 0644)
 			if err != nil {
-				log.Printf("Could not touch file [%s]", fname)
+				color.Red("Could not touch file [%s]", fname)
 			}
 			f.Close()
 		}
 		lastUpdate = time.Now()
 	} else {
-		log.Printf("\t\t> Exists [%s]", fname)
+		color.Cyan("\t\t> Exists [%s]", fname)
 		fi, err := os.Stat(fname)
 		if err != nil {
 			return lastUpdate, err

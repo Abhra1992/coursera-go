@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmt"
+	"path"
 	"sensei/api"
 	"sensei/types"
 
@@ -9,18 +9,25 @@ import (
 )
 
 // HandleSpecialization handles subcommand for specialization
-func HandleSpecialization(name string) {
-	color.Cyan("Specializations")
-	session := api.NewSession(api.CookieFile)
-	sp, _ := GetSpecialization(session, name)
-	fmt.Println(sp.Name)
-	fmt.Println(sp.Courses)
+func HandleSpecialization(args *types.Arguments) {
+	color.Cyan("Specialization: %s", args.ClassNames)
+	cf := path.Join(args.Path, api.CookieFile)
+	session := api.NewSession(cf)
+	sp, _ := GetSpecialization(session, args.ClassNames[0])
+	color.Cyan("Name: %s", sp.Name)
+	for _, c := range sp.Courses {
+		color.Green("Course Name: %s", c.Name)
+		DownloadOnDemandClass(session, c.Slug, args)
+	}
 }
 
 // HandleCourses handles subcommand for courses
 func HandleCourses(args *types.Arguments) {
 	courseNames := args.ClassNames
 	color.Cyan("Class Names: %s", courseNames)
-	session := api.NewSession(api.CookieFile)
-	DownloadOnDemandClass(session, courseNames[0], args)
+	cf := path.Join(args.Path, api.CookieFile)
+	session := api.NewSession(cf)
+	for _, c := range courseNames {
+		DownloadOnDemandClass(session, c, args)
+	}
 }

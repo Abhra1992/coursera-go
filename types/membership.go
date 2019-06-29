@@ -9,6 +9,6 @@ type MembershipsResponse struct {
 		UserID   int    `json:"userId"`
 	} `json:"elements"`
 	Linked struct {
-		Courses []Course `json:"courses.v1"`
+		Courses []CourseResponse `json:"courses.v1"`
 	} `json:"linked"`
 }
