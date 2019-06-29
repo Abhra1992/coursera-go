@@ -1,6 +1,14 @@
 package services
 
-import "os"
+import (
+	"coursera/api"
+	"net/url"
+	"os"
+	"runtime"
+	"strings"
+
+	"golang.org/x/net/html"
+)
 
 // EnsureDirExists makes sure a directory is created before any operations are performed inside it
 func EnsureDirExists(dirName string) error {
@@ -20,11 +28,20 @@ func FileExists(fname string) (bool, error) {
 	if os.IsNotExist(err) {
 		return false, nil
 	}
-	return true, err
+	return false, err
 }
+
+var replacer = strings.NewReplacer(":", "-", "/", "-", "<", "-", ">", "-", "\"", "-", "\\", "-", "|", "-", "?", "-", "*", "-", "\n", " ", "\x00", "-")
 
 // CleanFileName cleans invalid characters from file name
 func CleanFileName(fname string) string {
+	s := html.UnescapeString(fname)
+	q, err := url.QueryUnescape(s)
+	if err == nil {
+		s = q
+	}
+	s = replacer.Replace(s)
+	s = strings.TrimRight(s, " .")
 	// Copy from python utils
 	return fname
 }
@@ -33,4 +50,12 @@ func CleanFileName(fname string) string {
 func CleanURL(link string) string {
 	// Copy from python utils
 	return link
+}
+
+// NormalizeFilePath Prepends device namespace to Windows paths
+func NormalizeFilePath(path string) string {
+	if runtime.GOOS == "windows" && !strings.HasPrefix(path, api.WindowsUNCPrefix) {
+		return api.WindowsUNCPrefix + path
+	}
+	return path
 }

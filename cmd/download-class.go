@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"coursera/api"
+	"coursera/downloader"
+	"coursera/scheduler"
 	"coursera/services"
 	"coursera/types"
 	"encoding/json"
@@ -11,8 +13,7 @@ import (
 )
 
 // DownloadOnDemandClass downloads a single Coursera On Demand class
-func DownloadOnDemandClass(cs *api.CourseraSession, className string, args *types.Arguments) (bool, error) {
-	extractor := services.NewCourseraExtractor(cs, args)
+func DownloadOnDemandClass(cs *api.Session, className string, args *types.Arguments) (bool, error) {
 	var modules []*types.Module
 	// Check if syllabus is cached - if yes, use it
 	sf := fmt.Sprintf("%s-syllabus.json", className)
@@ -32,7 +33,9 @@ func DownloadOnDemandClass(cs *api.CourseraSession, className string, args *type
 		}
 	}
 	if modules == nil {
-		ems, err := extractor.GetModules(className)
+		// TODO: this extractor step can go inside workflow
+		ce := services.NewCourseraExtractor(cs, args)
+		ems, err := ce.GetModules(className)
 		modules = ems
 		if err != nil {
 			fmt.Println("Error getting Modules")
@@ -50,9 +53,9 @@ func DownloadOnDemandClass(cs *api.CourseraSession, className string, args *type
 	if args.OnlySyllabus {
 		return true, nil
 	}
-	downloader := services.GetDownloader(cs, args)
-	scheduler := services.NewConsecutiveScheduler(downloader)
-	workflow := services.NewCourseraWorkflow(scheduler, args, className)
+	fd := downloader.Create(cs, args)
+	ts := scheduler.Create(fd, args)
+	workflow := services.NewCourseraWorkflow(ts, args, className)
 	completed, err := workflow.DownloadModules(modules)
 	return completed, err
 }

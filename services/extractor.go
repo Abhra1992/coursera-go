@@ -15,12 +15,12 @@ type IExtractor interface {
 
 // CourseraExtractor extracts links from the Coursera API
 type CourseraExtractor struct {
-	Session *api.CourseraSession
+	Session *api.Session
 	args    *types.Arguments
 }
 
 // NewCourseraExtractor creates a new Coursera Extractor
-func NewCourseraExtractor(session *api.CourseraSession, args *types.Arguments) *CourseraExtractor {
+func NewCourseraExtractor(session *api.Session, args *types.Arguments) *CourseraExtractor {
 	return &CourseraExtractor{Session: session, args: args}
 }
 
@@ -41,17 +41,6 @@ func (e *CourseraExtractor) GetModules(className string) ([]*types.Module, error
 		return nil, err
 	}
 	return modules, nil
-}
-
-// Deprecated: Superseded by getOnDemandSyllabus
-func (e *CourseraExtractor) getOnDemandSyllabusString(className string) (string, error) {
-	url := fmt.Sprintf(api.CourseMaterialsURL, className)
-	syl, err := e.Session.GetString(url)
-	if err != nil {
-		return "", err
-	}
-	log.Printf("Downloaded %s (%d bytes)", url, len(syl))
-	return syl, nil
 }
 
 func (e *CourseraExtractor) getOnDemandSyllabus(className string) (*types.CourseMaterialsResponse, error) {

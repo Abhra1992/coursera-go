@@ -14,13 +14,13 @@ import (
 
 // CourseraOnDemand downloads a Coursera On Demand course
 type CourseraOnDemand struct {
-	Session *api.CourseraSession
+	Session *api.Session
 	args    *types.Arguments
 	classID string
 }
 
 // NewCourseraOnDemand constructor
-func NewCourseraOnDemand(session *api.CourseraSession, classID string, args *types.Arguments) *CourseraOnDemand {
+func NewCourseraOnDemand(session *api.Session, classID string, args *types.Arguments) *CourseraOnDemand {
 	return &CourseraOnDemand{Session: session, classID: classID, args: args}
 }
 

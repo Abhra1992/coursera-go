@@ -7,7 +7,7 @@ import (
 )
 
 // GetSpecialization fetches the details of a specialization
-func GetSpecialization(cs *api.CourseraSession, name string) (*types.Specialization, error) {
+func GetSpecialization(cs *api.Session, name string) (*types.Specialization, error) {
 	url := fmt.Sprintf(api.SpecializationURL, name)
 	var sr types.SpecializationResponse
 	err := cs.GetJSON(url, &sr)

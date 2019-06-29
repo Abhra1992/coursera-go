@@ -16,7 +16,6 @@ func NewCookieJar(file string) *cookiejar.Jar {
 	if err != nil {
 		panic(err)
 	}
-
 	cj, _ := cookiejar.New(nil)
 	u, _ := url.Parse(APIBaseURL)
 	cj.SetCookies(u, cookies)

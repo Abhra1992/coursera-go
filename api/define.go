@@ -23,7 +23,8 @@ const (
 	SupplementsURL       = APIBaseURL + "/onDemandSupplements.v1/%s~%s?includes=asset&fields=openCourseAssets.v1(typeName),openCourseAssets.v1(definition)"
 	AssetURL             = APIBaseURL + "/assetUrls.v1?ids=%s"
 
-	InMemoryMarker = "#inmemory#"
+	InMemoryMarker   = "#inmemory#"
+	WindowsUNCPrefix = "\\\\?\\"
 )
 
 // MakeCourseraAbsoluteURL converts a relative URL to an absolute URL

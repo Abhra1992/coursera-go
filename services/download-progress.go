@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// DownloadProgress represents the progress bar for downloads
 type DownloadProgress struct {
 	total    float64
 	current  float64
@@ -15,11 +16,13 @@ type DownloadProgress struct {
 	finished bool
 }
 
+// Start indicates download has started
 func (dp DownloadProgress) Start() {
 	dp.now = time.Now()
 	dp.start = dp.now
 }
 
+// Stop indicates download has stopped
 func (dp DownloadProgress) Stop() {
 	dp.now = time.Now()
 	dp.finished = true
@@ -27,18 +30,21 @@ func (dp DownloadProgress) Stop() {
 	dp.ReportProgress()
 }
 
+// Read indicates download file is read from source
 func (dp DownloadProgress) Read(bytes float64) {
 	dp.now = time.Now()
 	dp.current += bytes
 	dp.ReportProgress()
 }
 
+// Report indicates the amount of file downloaded
 func (dp DownloadProgress) Report(bytes float64) {
 	dp.now = time.Now()
 	dp.current += bytes
 	dp.ReportProgress()
 }
 
+// CalcPercent indicates the percent of file downloaded
 func (dp DownloadProgress) CalcPercent() string {
 	if dp.total < 0 {
 		return "--%"
@@ -52,6 +58,7 @@ func (dp DownloadProgress) CalcPercent() string {
 	return display
 }
 
+// CalcSpeed indicates the speed of download
 func (dp DownloadProgress) CalcSpeed() string {
 	diff := float64(dp.now.Sub(dp.start) / time.Second)
 	if dp.current == 0 || diff < 0.001 {
@@ -61,6 +68,7 @@ func (dp DownloadProgress) CalcSpeed() string {
 	return fmt.Sprintf("%s/s", fbytes)
 }
 
+// ReportProgress actually reports the download progress
 func (dp DownloadProgress) ReportProgress() {
 	percent := dp.CalcPercent()
 	total := formatBytes(dp.total)

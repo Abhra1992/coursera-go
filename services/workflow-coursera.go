@@ -2,6 +2,7 @@ package services
 
 import (
 	"coursera/api"
+	"coursera/scheduler"
 	"coursera/types"
 	"fmt"
 	"io/ioutil"
@@ -14,7 +15,7 @@ import (
 
 // CourseraWorkflow sets up the workflow for downloading Coursera class resources
 type CourseraWorkflow struct {
-	scheduler   IDownloadScheduler
+	scheduler   scheduler.IScheduler
 	args        *types.Arguments
 	className   string
 	skippedURLs []string
@@ -22,7 +23,7 @@ type CourseraWorkflow struct {
 }
 
 // NewCourseraWorkflow constructor
-func NewCourseraWorkflow(dw IDownloadScheduler, args *types.Arguments, className string) *CourseraWorkflow {
+func NewCourseraWorkflow(dw scheduler.IScheduler, args *types.Arguments, className string) *CourseraWorkflow {
 	return &CourseraWorkflow{dw, args, className, make([]string, 0), make([]string, 0)}
 }
 
@@ -50,7 +51,7 @@ func (cw *CourseraWorkflow) DownloadModules(modules []*types.Module) (bool, erro
 			}
 		}
 	}
-	err = cw.scheduler.Join()
+	cw.scheduler.Complete()
 	return true, err
 }
 func (cw *CourseraWorkflow) resolveEnsureExecutionPaths() (string, string, error) {
@@ -80,7 +81,8 @@ func (cw *CourseraWorkflow) handleResource(link string, format string, fname str
 			} else if cw.skippedURLs != nil && shouldSkipFormatURL(format, link) {
 				cw.skippedURLs = append(cw.skippedURLs, link)
 			} else {
-				cw.scheduler.Download(link, fname)
+				dt := scheduler.DownloadTask{URL: link, File: fname, Callback: cw.onCompletionCallback}
+				cw.scheduler.Schedule(dt)
 			}
 		} else {
 			// touch file
@@ -103,6 +105,13 @@ func (cw *CourseraWorkflow) handleResource(link string, format string, fname str
 		}
 	}
 	return lastUpdate, nil
+}
+
+func (cw *CourseraWorkflow) onCompletionCallback(link string, err error) {
+	if err != nil {
+		log.Println(err.Error())
+		cw.failedURLs = append(cw.failedURLs, link)
+	}
 }
 
 func (cw *CourseraWorkflow) runHooks() {}

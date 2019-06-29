@@ -1,4 +1,4 @@
-package services
+package downloader
 
 import (
 	"coursera/api"
@@ -8,7 +8,7 @@ import (
 // ExternalDownloader represents an abstract downloader using external tools
 type ExternalDownloader struct {
 	IDownloader
-	Session *api.CourseraSession
+	Session *api.Session
 	Binary  string
 }
 
@@ -36,7 +36,7 @@ func (ed *ExternalDownloader) startDownload(url string, file string, resume bool
 }
 
 func (ed *ExternalDownloader) prepareCookies(command []string, url string) []string {
-	cookies := ed.Session.Session.RequestOptions.Cookies
+	cookies := ed.Session.RequestOptions.Cookies
 	if len(cookies) > 0 {
 		command = ed.addCookies(command, api.BuildCookieHeader(cookies))
 	}

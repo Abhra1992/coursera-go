@@ -10,7 +10,7 @@ import (
 // HandleSpecialization handles subcommand for specialization
 func HandleSpecialization(name string) {
 	fmt.Println("Specializations")
-	session := api.NewCourseraSession(api.CookieFile)
+	session := api.NewSession(api.CookieFile)
 	sp, _ := GetSpecialization(session, name)
 	fmt.Println(sp.Name)
 	fmt.Println(sp.Courses)
@@ -20,6 +20,6 @@ func HandleSpecialization(name string) {
 func HandleCourses(args *types.Arguments) {
 	courseNames := args.ClassNames
 	log.Printf("Class Names: %s", courseNames)
-	session := api.NewCourseraSession(api.CookieFile)
+	session := api.NewSession(api.CookieFile)
 	DownloadOnDemandClass(session, courseNames[0], args)
 }
