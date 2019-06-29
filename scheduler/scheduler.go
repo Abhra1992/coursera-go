@@ -25,5 +25,5 @@ func (as *Scheduler) schedule(url string, file string) (string, error) {
 
 // Create instantiates a default scheduler for the downloader
 func Create(fd downloader.IDownloader, args *types.Arguments) IScheduler {
-	return NewConsecutiveScheduler(fd, args)
+	return NewParallelScheduler(fd, args)
 }

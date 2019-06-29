@@ -1,8 +1,11 @@
 package downloader
 
 import (
+	"os"
+	"os/exec"
 	"sensei/api"
-	"log"
+
+	"github.com/fatih/color"
 )
 
 // ExternalDownloader represents an abstract downloader using external tools
@@ -23,15 +26,16 @@ func (ed *ExternalDownloader) startDownload(url string, file string, resume bool
 	if resume {
 		command = ed.enableResume(command)
 	}
-	log.Printf("\t\t> Downloading [%s...] => [%s]", url[:80], file)
-	// log.Printf("Executing %s %s", ed.Binary, command)
-	// process := exec.Command(ed.Binary, command...)
-	// process.Stdout = os.Stdout
-	// process.Stderr = os.Stderr
-	// err := process.Run()
-	// if err != nil {
-	// 	log.Panic("Download Process Failed")
-	// }
+	color.Cyan("\t\t> Downloading [%s...] => [%s]", url[:80], file)
+	// color.Cyan("Executing %s %s", ed.Binary, command)
+	process := exec.Command(ed.Binary, command...)
+	process.Stdout = os.Stdout
+	process.Stderr = os.Stderr
+	err := process.Run()
+	if err != nil {
+		color.Red("Download Process Failed")
+		return err
+	}
 	return nil
 }
 

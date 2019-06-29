@@ -1,11 +1,12 @@
 package coursera
 
 import (
+	"fmt"
 	"sensei/api"
 	"sensei/types"
-	"fmt"
-	"log"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 // IExtractor represents the interface for a url extractor from an API
@@ -30,8 +31,8 @@ func (e *Extractor) ListCourses() ([]types.Course, error) {
 	return course.ListCourses()
 }
 
-// GetModules get the modules for a given class
-func (e *Extractor) GetModules(className string) ([]*types.Module, error) {
+// GetCourse get the syllabus for a given class
+func (e *Extractor) GetCourse(className string) ([]*types.Module, error) {
 	syl, err := e.getOnDemandSyllabus(className)
 	if err != nil {
 		return nil, err
@@ -55,12 +56,12 @@ func (e *Extractor) getOnDemandSyllabus(className string) (*types.CourseMaterial
 
 func (e *Extractor) parseOnDemandSyllabus(className string, cm *types.CourseMaterialsResponse) ([]*types.Module, error) {
 	classID := cm.Elements[0].ID
-	log.Printf("Syllabus for Course %s", classID)
+	color.Green("Syllabus for Course %s", classID)
 	course := NewOnDemand(e.Session, classID, e.args)
 	var modules []*types.Module
 	allModules := cm.GetModuleCollection()
 	for _, mr := range allModules {
-		log.Printf("Module [%s] [%s]", mr.ID, mr.Name)
+		color.Yellow("Module [%s] [%s]", mr.ID, mr.Name)
 		module, err := e.fillModuleSections(mr, cm, course)
 		if err != nil {
 			return nil, err
@@ -77,9 +78,9 @@ func (e *Extractor) fillSectionItems(sr *types.SectionResponse, cm *types.Course
 	allItems := cm.GetItemCollection()
 	for _, iid := range sr.ItemIds {
 		ir := allItems[iid]
-		log.Printf("\t\t%s Item [%s] [%s]", strings.Title(ir.ContentSummary.TypeName), ir.ID, ir.Name)
+		color.Green("\t\t%s Item [%s] [%s]", strings.Title(ir.ContentSummary.TypeName), ir.ID, ir.Name)
 		if ir.IsLocked {
-			log.Printf("\t\t\t[Locked] Reason: %s", ir.ItemLockSummary.LockState.ReasonCode)
+			color.Blue("\t\t\t[Locked] Reason: %s", ir.ItemLockSummary.LockState.ReasonCode)
 			continue
 		}
 		item, err := e.fillItemLinks(ir, course)
@@ -88,7 +89,7 @@ func (e *Extractor) fillSectionItems(sr *types.SectionResponse, cm *types.Course
 		}
 		if item.Resources != nil {
 			for _, res := range item.Resources {
-				log.Printf("\t\t\t [%s] %s...", res.Extension, res.Link[:80])
+				color.Cyan("\t\t\t [%s] %s...", res.Extension, res.Link[:80])
 			}
 		}
 		items = append(items, item)
@@ -104,7 +105,7 @@ func (e *Extractor) fillModuleSections(mr *types.ModuleResponse, cm *types.Cours
 	allSections := cm.GetSectionCollection()
 	for _, sid := range mr.LessonIds {
 		sr := allSections[sid]
-		log.Printf("\tSection [%s] [%s]", sr.ID, sr.Name)
+		color.Magenta("\tSection [%s] [%s]", sr.ID, sr.Name)
 		section, err := e.fillSectionItems(sr, cm, course)
 		if err != nil {
 			return nil, err
@@ -128,7 +129,7 @@ func (e *Extractor) fillItemLinks(ir *types.ItemResponse, course *OnDemand) (*ty
 	case "PhasedPeer", "GradedProgramming", "UngradedProgramming":
 	case "Quiz", "Exam", "Programming", "Notebook":
 	default:
-		log.Printf("Unsupported type %s in Item %s %s", item.Type, item.Name, item.ID)
+		color.Red("Unsupported type %s in Item %s %s", item.Type, item.Name, item.ID)
 	}
 	item.Resources = resx
 	return item, nil

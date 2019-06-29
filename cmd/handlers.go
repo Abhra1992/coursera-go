@@ -1,15 +1,16 @@
 package cmd
 
 import (
+	"fmt"
 	"sensei/api"
 	"sensei/types"
-	"fmt"
-	"log"
+
+	"github.com/fatih/color"
 )
 
 // HandleSpecialization handles subcommand for specialization
 func HandleSpecialization(name string) {
-	fmt.Println("Specializations")
+	color.Cyan("Specializations")
 	session := api.NewSession(api.CookieFile)
 	sp, _ := GetSpecialization(session, name)
 	fmt.Println(sp.Name)
@@ -19,7 +20,7 @@ func HandleSpecialization(name string) {
 // HandleCourses handles subcommand for courses
 func HandleCourses(args *types.Arguments) {
 	courseNames := args.ClassNames
-	log.Printf("Class Names: %s", courseNames)
+	color.Cyan("Class Names: %s", courseNames)
 	session := api.NewSession(api.CookieFile)
 	DownloadOnDemandClass(session, courseNames[0], args)
 }

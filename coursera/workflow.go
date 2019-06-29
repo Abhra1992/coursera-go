@@ -12,6 +12,8 @@ import (
 	"sensei/types"
 	"strings"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 // Workflow sets up the workflow for downloading Coursera class resources
@@ -28,23 +30,23 @@ func NewWorkflow(dw scheduler.IScheduler, args *types.Arguments, className strin
 	return &Workflow{dw, args, className, make([]string, 0), make([]string, 0)}
 }
 
-// DownloadModules downloads the modules in the Coursera class
-func (cw *Workflow) DownloadModules(modules []*types.Module) (bool, error) {
+// DownloadCourse downloads the Coursera class from the syllabus
+func (cw *Workflow) DownloadCourse(modules []*types.Module) (bool, error) {
 	_, cpath, err := cw.resolveEnsureExecutionPaths()
 	if err != nil {
 		return false, err
 	}
 	for _, module := range modules {
-		log.Printf("MODULE %s", module.Name)
+		color.Yellow("MODULE %s", module.Name)
 		lastUpdate := time.Time{}
 		for _, section := range module.Sections {
-			log.Printf("\tSECTION %s", section.Name)
+			color.Magenta("\tSECTION %s", section.Name)
 			spath := filepath.Join(cpath, module.Symbol, section.Symbol)
 			if err := services.EnsureDirExists(spath); err != nil {
 				return false, err
 			}
 			for ii, item := range section.Items {
-				log.Printf("\t\t%s ITEM %s", item.Type, item.Symbol)
+				color.Green("\t\t%s ITEM %s", item.Type, item.Symbol)
 				for _, res := range item.Resources {
 					fname := filepath.Join(spath, fmt.Sprintf("%02d-%s.%s", ii, item.Symbol, res.Extension))
 					cw.handleResource(res.Link, res.Extension, fname, lastUpdate)

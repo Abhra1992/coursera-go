@@ -168,6 +168,9 @@ func (od *OnDemand) extractAssetURLs(assetTags map[string]*types.AssetDefinition
 	if err != nil {
 		return nil, err
 	}
+	if ar == nil {
+		return nil, nil
+	}
 	return ar.Assets, nil
 }
 
@@ -178,7 +181,7 @@ func (od *OnDemand) extractLinksFromAnchorTags(page *types.AssetPage) ResourceGr
 			continue
 		}
 		fname := path.Base(services.CleanURL(a.Href))
-		ext := filepath.Ext(fname)
+		ext := strings.ToLower(filepath.Ext(fname))
 		if ext == "" {
 			continue
 		}
