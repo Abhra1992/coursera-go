@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"coursera/api"
-	"coursera/types"
+	"sensei/api"
+	"sensei/types"
 	"fmt"
 )
 

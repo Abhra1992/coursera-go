@@ -14,7 +14,8 @@ const (
 	ComplexFormats = ".*[^a-zA-Z0-9_-]"
 )
 
-func shouldSkipFormatURL(format string, link string) bool {
+// ShouldSkipFormatURL decides if for a given format the url should be skipped from download
+func ShouldSkipFormatURL(format string, link string) bool {
 	if format == "" {
 		return true
 	}

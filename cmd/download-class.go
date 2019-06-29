@@ -1,15 +1,16 @@
 package cmd
 
 import (
-	"coursera/api"
-	"coursera/downloader"
-	"coursera/scheduler"
-	"coursera/services"
-	"coursera/types"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"sensei/api"
+	"sensei/coursera"
+	"sensei/downloader"
+	"sensei/scheduler"
+	"sensei/services"
+	"sensei/types"
 )
 
 // DownloadOnDemandClass downloads a single Coursera On Demand class
@@ -34,7 +35,7 @@ func DownloadOnDemandClass(cs *api.Session, className string, args *types.Argume
 	}
 	if modules == nil {
 		// TODO: this extractor step can go inside workflow
-		ce := services.NewCourseraExtractor(cs, args)
+		ce := coursera.NewExtractor(cs, args)
 		ems, err := ce.GetModules(className)
 		modules = ems
 		if err != nil {
@@ -55,7 +56,7 @@ func DownloadOnDemandClass(cs *api.Session, className string, args *types.Argume
 	}
 	fd := downloader.Create(cs, args)
 	ts := scheduler.Create(fd, args)
-	workflow := services.NewCourseraWorkflow(ts, args, className)
+	workflow := coursera.NewWorkflow(ts, args, className)
 	completed, err := workflow.DownloadModules(modules)
 	return completed, err
 }

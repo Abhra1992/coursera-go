@@ -1,6 +1,6 @@
 package downloader
 
-import "coursera/api"
+import "sensei/api"
 
 // Wget uses the wget tool to download files
 type Wget struct {

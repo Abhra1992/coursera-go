@@ -1,6 +1,6 @@
-package services
+package coursera
 
-import "coursera/types"
+import "sensei/types"
 
 // ResourceGroup is a custom type for grouping resources by extension
 type ResourceGroup map[string][]*types.Resource

@@ -1,7 +1,7 @@
 package services
 
 import (
-	"coursera/api"
+	"sensei/api"
 	"net/url"
 	"os"
 	"runtime"

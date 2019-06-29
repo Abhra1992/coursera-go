@@ -1,31 +1,32 @@
-package services
+package coursera
 
 import (
-	"coursera/api"
-	"coursera/types"
 	"fmt"
 	"log"
 	"path"
 	"path/filepath"
+	"sensei/api"
+	"sensei/services"
+	"sensei/types"
 	"strings"
 
 	"astuart.co/goq"
 )
 
-// CourseraOnDemand downloads a Coursera On Demand course
-type CourseraOnDemand struct {
+// OnDemand downloads a Coursera On Demand course
+type OnDemand struct {
 	Session *api.Session
 	args    *types.Arguments
 	classID string
 }
 
-// NewCourseraOnDemand constructor
-func NewCourseraOnDemand(session *api.Session, classID string, args *types.Arguments) *CourseraOnDemand {
-	return &CourseraOnDemand{Session: session, classID: classID, args: args}
+// NewOnDemand constructor
+func NewOnDemand(session *api.Session, classID string, args *types.Arguments) *OnDemand {
+	return &OnDemand{Session: session, classID: classID, args: args}
 }
 
 // ObtainUserID gets the current user id
-func (od *CourseraOnDemand) ObtainUserID() (int, error) {
+func (od *OnDemand) ObtainUserID() (int, error) {
 	var mr types.MembershipsResponse
 	err := od.Session.GetJSON(api.MembershipsURLLimit1, &mr)
 	if err != nil {
@@ -35,7 +36,7 @@ func (od *CourseraOnDemand) ObtainUserID() (int, error) {
 }
 
 // ListCourses lists the courses the user is enrolled in
-func (od *CourseraOnDemand) ListCourses() ([]types.Course, error) {
+func (od *OnDemand) ListCourses() ([]types.Course, error) {
 	var mr types.MembershipsResponse
 	err := od.Session.GetJSON(api.MembershipsURL, &mr)
 	if err != nil {
@@ -45,7 +46,7 @@ func (od *CourseraOnDemand) ListCourses() ([]types.Course, error) {
 }
 
 // ExtractLinksFromLecture gets the links to resurces in a lecture item
-func (od *CourseraOnDemand) ExtractLinksFromLecture(videoID string) (ResourceGroup, error) {
+func (od *OnDemand) ExtractLinksFromLecture(videoID string) (ResourceGroup, error) {
 	content, err := od.extractVideosAndSubtitlesFromLecture(videoID)
 	if err != nil {
 		log.Panicf("Could not download videos")
@@ -55,7 +56,7 @@ func (od *CourseraOnDemand) ExtractLinksFromLecture(videoID string) (ResourceGro
 }
 
 // ExtractLinksFromSupplement gets the links to resources in a supplement item
-func (od *CourseraOnDemand) ExtractLinksFromSupplement(elementID string) (ResourceGroup, error) {
+func (od *OnDemand) ExtractLinksFromSupplement(elementID string) (ResourceGroup, error) {
 	var sr types.SupplementsResponse
 	url := fmt.Sprintf(api.SupplementsURL, od.classID, elementID)
 	err := od.Session.GetJSON(url, &sr)
@@ -71,11 +72,11 @@ func (od *CourseraOnDemand) ExtractLinksFromSupplement(elementID string) (Resour
 		}
 		supContent.extend(resx)
 	}
-	// Incomplete implementation
+	// Incomplete implementation - Not downloading Mathjax instructions
 	return supContent, nil
 }
 
-func (od *CourseraOnDemand) extractVideosAndSubtitlesFromLecture(videoID string) (ResourceGroup, error) {
+func (od *OnDemand) extractVideosAndSubtitlesFromLecture(videoID string) (ResourceGroup, error) {
 	var vr types.LectureVideosResponse
 	url := fmt.Sprintf(api.LectureVideosURL, od.classID, videoID)
 	err := od.Session.GetJSON(url, &vr)
@@ -94,7 +95,7 @@ func (od *CourseraOnDemand) extractVideosAndSubtitlesFromLecture(videoID string)
 	return videoContent, nil
 }
 
-func (od *CourseraOnDemand) extractMediaFromVideo(vr *types.Video, videoContent ResourceGroup) {
+func (od *OnDemand) extractMediaFromVideo(vr *types.Video, videoContent ResourceGroup) {
 	if vr.Source.Resolution != nil {
 		res := od.args.Resolution
 		if link, ok := vr.Source.Resolution[res]; ok {
@@ -104,7 +105,7 @@ func (od *CourseraOnDemand) extractMediaFromVideo(vr *types.Video, videoContent 
 	}
 }
 
-func (od *CourseraOnDemand) extractSubtitlesFromVideo(vr *types.Video, videoContent ResourceGroup) {
+func (od *OnDemand) extractSubtitlesFromVideo(vr *types.Video, videoContent ResourceGroup) {
 	if vr.Subtitles != nil {
 		lang := od.args.SubtitleLanguage
 		if link, ok := vr.Subtitles[lang]; ok {
@@ -118,7 +119,7 @@ func getLectureAssetIDs()            {}
 func normalizeAssets()               {}
 func extractLinksFromLectureAssets() {}
 
-func (od *CourseraOnDemand) extractLinksFromText(text string) (ResourceGroup, error) {
+func (od *OnDemand) extractLinksFromText(text string) (ResourceGroup, error) {
 	resx := make(ResourceGroup)
 	var page types.AssetPage
 	err := goq.Unmarshal([]byte(text), &page)
@@ -139,7 +140,7 @@ func (od *CourseraOnDemand) extractLinksFromText(text string) (ResourceGroup, er
 	return resx, nil
 }
 
-func (od *CourseraOnDemand) extractLinksFromAssetTags(page *types.AssetPage) (ResourceGroup, error) {
+func (od *OnDemand) extractLinksFromAssetTags(page *types.AssetPage) (ResourceGroup, error) {
 	assetTags, err := extractAssetTags(page)
 	if err != nil {
 		return nil, err
@@ -153,7 +154,7 @@ func (od *CourseraOnDemand) extractLinksFromAssetTags(page *types.AssetPage) (Re
 		return nil, err
 	}
 	for _, a := range assets {
-		title, ext, link := CleanFileName(assetTags[a.ID].Name), CleanFileName(assetTags[a.ID].Extension), a.URL
+		title, ext, link := services.CleanFileName(assetTags[a.ID].Name), services.CleanFileName(assetTags[a.ID].Extension), a.URL
 		resx[ext] = append(resx[ext], &types.Resource{Name: title, Link: link, Extension: ext})
 	}
 	return resx, nil
@@ -167,7 +168,7 @@ func extractAssetTags(page *types.AssetPage) (map[string]*types.AssetDefinition,
 	return assets, nil
 }
 
-func (od *CourseraOnDemand) extractAssetURLs(assetTags map[string]*types.AssetDefinition) ([]*types.Asset, error) {
+func (od *OnDemand) extractAssetURLs(assetTags map[string]*types.AssetDefinition) ([]*types.Asset, error) {
 	assetIDs := make([]string, 0, len(assetTags))
 	for k := range assetTags {
 		assetIDs = append(assetIDs, k)
@@ -182,18 +183,18 @@ func (od *CourseraOnDemand) extractAssetURLs(assetTags map[string]*types.AssetDe
 	return ar.Assets, nil
 }
 
-func (od *CourseraOnDemand) extractLinksFromAnchorTags(page *types.AssetPage) (ResourceGroup, error) {
+func (od *OnDemand) extractLinksFromAnchorTags(page *types.AssetPage) (ResourceGroup, error) {
 	resx := make(ResourceGroup)
 	for _, a := range page.Anchors {
 		if a.Href == "" {
 			continue
 		}
-		fname := path.Base(CleanURL(a.Href))
+		fname := path.Base(services.CleanURL(a.Href))
 		ext := filepath.Ext(fname)
 		if ext == "" {
 			continue
 		}
-		base, ext := CleanFileName(strings.TrimSuffix(fname, ext)), strings.Trim(CleanFileName(ext), " .")
+		base, ext := services.CleanFileName(strings.TrimSuffix(fname, ext)), strings.Trim(services.CleanFileName(ext), " .")
 		resx[ext] = append(resx[ext], &types.Resource{Name: base, Link: a.Href, Extension: ext})
 	}
 	return resx, nil

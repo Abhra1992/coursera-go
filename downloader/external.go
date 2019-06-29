@@ -1,7 +1,7 @@
 package downloader
 
 import (
-	"coursera/api"
+	"sensei/api"
 	"log"
 )
 

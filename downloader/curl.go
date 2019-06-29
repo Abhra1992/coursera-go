@@ -1,6 +1,6 @@
 package downloader
 
-import "coursera/api"
+import "sensei/api"
 
 // Curl uses the curl tool to download files
 type Curl struct {

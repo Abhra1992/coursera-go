@@ -1,6 +1,6 @@
 package downloader
 
-import "coursera/api"
+import "sensei/api"
 
 // Axel uses the axel tool to download files
 type Axel struct {

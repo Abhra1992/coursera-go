@@ -1,7 +1,7 @@
 package services
 
 import (
-	"coursera/types"
+	"sensei/types"
 )
 
 // IWorkflow represents the interface for a download workflow

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"coursera/cmd"
-	"coursera/types"
+	"sensei/cmd"
+	"sensei/types"
 
 	"github.com/alexflint/go-arg"
 )

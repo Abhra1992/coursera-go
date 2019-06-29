@@ -1,8 +1,8 @@
 package downloader
 
 import (
-	"coursera/api"
-	"coursera/types"
+	"sensei/api"
+	"sensei/types"
 )
 
 // IDownloader represents the interface of a resource downloader

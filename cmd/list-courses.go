@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"coursera/api"
-	"coursera/services"
-	"coursera/types"
+	"sensei/api"
+	"sensei/coursera"
+	"sensei/types"
 	"fmt"
 	"log"
 )
@@ -11,7 +11,7 @@ import (
 // ListCourses lists the courses in which the user is enrolled
 func ListCourses(args *types.Arguments) {
 	session := api.NewSession(api.CookieFile)
-	extractor := services.NewCourseraExtractor(session, args)
+	extractor := coursera.NewExtractor(session, args)
 	courses, err := extractor.ListCourses()
 	if err != nil {
 		log.Panicf("Could not list courses")

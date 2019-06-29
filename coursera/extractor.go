@@ -1,8 +1,8 @@
-package services
+package coursera
 
 import (
-	"coursera/api"
-	"coursera/types"
+	"sensei/api"
+	"sensei/types"
 	"fmt"
 	"log"
 	"strings"
@@ -13,25 +13,25 @@ type IExtractor interface {
 	GetModules() []string
 }
 
-// CourseraExtractor extracts links from the Coursera API
-type CourseraExtractor struct {
+// Extractor extracts links from the Coursera API
+type Extractor struct {
 	Session *api.Session
 	args    *types.Arguments
 }
 
-// NewCourseraExtractor creates a new Coursera Extractor
-func NewCourseraExtractor(session *api.Session, args *types.Arguments) *CourseraExtractor {
-	return &CourseraExtractor{Session: session, args: args}
+// NewExtractor creates a new Coursera Extractor
+func NewExtractor(session *api.Session, args *types.Arguments) *Extractor {
+	return &Extractor{Session: session, args: args}
 }
 
 // ListCourses list the courses the user has enrolled in
-func (e *CourseraExtractor) ListCourses() ([]types.Course, error) {
-	course := NewCourseraOnDemand(e.Session, "", e.args)
+func (e *Extractor) ListCourses() ([]types.Course, error) {
+	course := NewOnDemand(e.Session, "", e.args)
 	return course.ListCourses()
 }
 
 // GetModules get the modules for a given class
-func (e *CourseraExtractor) GetModules(className string) ([]*types.Module, error) {
+func (e *Extractor) GetModules(className string) ([]*types.Module, error) {
 	syl, err := e.getOnDemandSyllabus(className)
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func (e *CourseraExtractor) GetModules(className string) ([]*types.Module, error
 	return modules, nil
 }
 
-func (e *CourseraExtractor) getOnDemandSyllabus(className string) (*types.CourseMaterialsResponse, error) {
+func (e *Extractor) getOnDemandSyllabus(className string) (*types.CourseMaterialsResponse, error) {
 	url := fmt.Sprintf(api.CourseMaterialsURL, className)
 	var cmr types.CourseMaterialsResponse
 	err := e.Session.GetJSON(url, &cmr)
@@ -53,10 +53,10 @@ func (e *CourseraExtractor) getOnDemandSyllabus(className string) (*types.Course
 	return &cmr, nil
 }
 
-func (e *CourseraExtractor) parseOnDemandSyllabus(className string, cm *types.CourseMaterialsResponse) ([]*types.Module, error) {
+func (e *Extractor) parseOnDemandSyllabus(className string, cm *types.CourseMaterialsResponse) ([]*types.Module, error) {
 	classID := cm.Elements[0].ID
 	log.Printf("Syllabus for Course %s", classID)
-	course := NewCourseraOnDemand(e.Session, classID, e.args)
+	course := NewOnDemand(e.Session, classID, e.args)
 	var modules []*types.Module
 	allModules := cm.GetModuleCollection()
 	for _, mr := range allModules {
@@ -70,8 +70,8 @@ func (e *CourseraExtractor) parseOnDemandSyllabus(className string, cm *types.Co
 	return modules, nil
 }
 
-func (e *CourseraExtractor) fillSectionItems(sr *types.SectionResponse, cm *types.CourseMaterialsResponse,
-	course *CourseraOnDemand) (*types.Section, error) {
+func (e *Extractor) fillSectionItems(sr *types.SectionResponse, cm *types.CourseMaterialsResponse,
+	course *OnDemand) (*types.Section, error) {
 	section := sr.ToModel()
 	var items []*types.Item
 	allItems := cm.GetItemCollection()
@@ -97,8 +97,8 @@ func (e *CourseraExtractor) fillSectionItems(sr *types.SectionResponse, cm *type
 	return section, nil
 }
 
-func (e *CourseraExtractor) fillModuleSections(mr *types.ModuleResponse, cm *types.CourseMaterialsResponse,
-	course *CourseraOnDemand) (*types.Module, error) {
+func (e *Extractor) fillModuleSections(mr *types.ModuleResponse, cm *types.CourseMaterialsResponse,
+	course *OnDemand) (*types.Module, error) {
 	module := mr.ToModel()
 	var sections []*types.Section
 	allSections := cm.GetSectionCollection()
@@ -115,7 +115,7 @@ func (e *CourseraExtractor) fillModuleSections(mr *types.ModuleResponse, cm *typ
 	return module, nil
 }
 
-func (e *CourseraExtractor) fillItemLinks(ir *types.ItemResponse, course *CourseraOnDemand) (*types.Item, error) {
+func (e *Extractor) fillItemLinks(ir *types.ItemResponse, course *OnDemand) (*types.Item, error) {
 	item := ir.ToModel()
 	var resx []*types.Resource
 	switch item.Type {

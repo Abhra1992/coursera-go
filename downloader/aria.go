@@ -1,6 +1,6 @@
 package downloader
 
-import "coursera/api"
+import "sensei/api"
 
 // Aria2 uses the aria2c tool to download files
 type Aria2 struct {

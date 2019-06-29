@@ -1,20 +1,21 @@
-package services
+package coursera
 
 import (
-	"coursera/api"
-	"coursera/scheduler"
-	"coursera/types"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+	"sensei/api"
+	"sensei/scheduler"
+	"sensei/services"
+	"sensei/types"
 	"strings"
 	"time"
 )
 
-// CourseraWorkflow sets up the workflow for downloading Coursera class resources
-type CourseraWorkflow struct {
+// Workflow sets up the workflow for downloading Coursera class resources
+type Workflow struct {
 	scheduler   scheduler.IScheduler
 	args        *types.Arguments
 	className   string
@@ -22,13 +23,13 @@ type CourseraWorkflow struct {
 	failedURLs  []string
 }
 
-// NewCourseraWorkflow constructor
-func NewCourseraWorkflow(dw scheduler.IScheduler, args *types.Arguments, className string) *CourseraWorkflow {
-	return &CourseraWorkflow{dw, args, className, make([]string, 0), make([]string, 0)}
+// NewWorkflow constructor
+func NewWorkflow(dw scheduler.IScheduler, args *types.Arguments, className string) *Workflow {
+	return &Workflow{dw, args, className, make([]string, 0), make([]string, 0)}
 }
 
 // DownloadModules downloads the modules in the Coursera class
-func (cw *CourseraWorkflow) DownloadModules(modules []*types.Module) (bool, error) {
+func (cw *Workflow) DownloadModules(modules []*types.Module) (bool, error) {
 	_, cpath, err := cw.resolveEnsureExecutionPaths()
 	if err != nil {
 		return false, err
@@ -39,7 +40,7 @@ func (cw *CourseraWorkflow) DownloadModules(modules []*types.Module) (bool, erro
 		for _, section := range module.Sections {
 			log.Printf("\tSECTION %s", section.Name)
 			spath := filepath.Join(cpath, module.Symbol, section.Symbol)
-			if err := EnsureDirExists(spath); err != nil {
+			if err := services.EnsureDirExists(spath); err != nil {
 				return false, err
 			}
 			for ii, item := range section.Items {
@@ -54,21 +55,21 @@ func (cw *CourseraWorkflow) DownloadModules(modules []*types.Module) (bool, erro
 	cw.scheduler.Complete()
 	return true, err
 }
-func (cw *CourseraWorkflow) resolveEnsureExecutionPaths() (string, string, error) {
+func (cw *Workflow) resolveEnsureExecutionPaths() (string, string, error) {
 	xpath := "."
 	if cw.args.Path != "" {
 		xpath = cw.args.Path
 	}
 	cpath := filepath.Join(xpath, cw.className)
-	if err := EnsureDirExists(cpath); err != nil {
+	if err := services.EnsureDirExists(cpath); err != nil {
 		return "", "", err
 	}
 	return xpath, cpath, nil
 }
 
-func (cw *CourseraWorkflow) handleResource(link string, format string, fname string, lastUpdate time.Time) (time.Time, error) {
+func (cw *Workflow) handleResource(link string, format string, fname string, lastUpdate time.Time) (time.Time, error) {
 	overwrite, resume, skipDownload := cw.args.Overwrite, cw.args.Resume, cw.args.SkipDownload
-	exists, err := FileExists(fname)
+	exists, err := services.FileExists(fname)
 	if err != nil {
 		return lastUpdate, err
 	}
@@ -78,7 +79,7 @@ func (cw *CourseraWorkflow) handleResource(link string, format string, fname str
 				pageContent := strings.TrimPrefix(link, api.InMemoryMarker)
 				log.Printf("Saving page contents to: %s", fname)
 				ioutil.WriteFile(fname, []byte(pageContent), 0644)
-			} else if cw.skippedURLs != nil && shouldSkipFormatURL(format, link) {
+			} else if cw.skippedURLs != nil && services.ShouldSkipFormatURL(format, link) {
 				cw.skippedURLs = append(cw.skippedURLs, link)
 			} else {
 				dt := scheduler.DownloadTask{URL: link, File: fname, Callback: cw.onCompletionCallback}
@@ -107,11 +108,11 @@ func (cw *CourseraWorkflow) handleResource(link string, format string, fname str
 	return lastUpdate, nil
 }
 
-func (cw *CourseraWorkflow) onCompletionCallback(link string, err error) {
+func (cw *Workflow) onCompletionCallback(link string, err error) {
 	if err != nil {
 		log.Println(err.Error())
 		cw.failedURLs = append(cw.failedURLs, link)
 	}
 }
 
-func (cw *CourseraWorkflow) runHooks() {}
+func (cw *Workflow) runHooks() {}

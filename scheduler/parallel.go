@@ -1,8 +1,8 @@
 package scheduler
 
 import (
-	"coursera/downloader"
-	"coursera/types"
+	"sensei/downloader"
+	"sensei/types"
 	"sync"
 )
 
