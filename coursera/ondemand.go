@@ -47,7 +47,21 @@ func (od *OnDemand) ListCourses() ([]types.Course, error) {
 
 // ExtractLinksFromLecture gets the links to resurces in a lecture item
 func (od *OnDemand) ExtractLinksFromLecture(videoID string) (ResourceGroup, error) {
-	content, err := od.extractVideosAndSubtitlesFromLecture(videoID)
+	var vr types.LectureVideosResponse
+	url := fmt.Sprintf(api.LectureVideosURL, od.classID, videoID)
+	err := od.Session.GetJSON(url, &vr)
+	if err != nil {
+		return nil, err
+	}
+	if len(vr.Linked.Videos) == 0 {
+		log.Println("No Videos available")
+		return nil, err
+	}
+	content := make(ResourceGroup)
+	for _, video := range vr.Linked.Videos {
+		od.extractMediaFromVideo(&video, content)
+		od.extractSubtitlesFromVideo(&video, content)
+	}
 	if err != nil {
 		log.Panicf("Could not download videos")
 		return nil, err
@@ -74,25 +88,6 @@ func (od *OnDemand) ExtractLinksFromSupplement(elementID string) (ResourceGroup,
 	}
 	// Incomplete implementation - Not downloading Mathjax instructions
 	return supContent, nil
-}
-
-func (od *OnDemand) extractVideosAndSubtitlesFromLecture(videoID string) (ResourceGroup, error) {
-	var vr types.LectureVideosResponse
-	url := fmt.Sprintf(api.LectureVideosURL, od.classID, videoID)
-	err := od.Session.GetJSON(url, &vr)
-	if err != nil {
-		return nil, err
-	}
-	if len(vr.Linked.Videos) == 0 {
-		log.Println("No Videos available")
-		return nil, err
-	}
-	videoContent := make(ResourceGroup)
-	for _, video := range vr.Linked.Videos {
-		od.extractMediaFromVideo(&video, videoContent)
-		od.extractSubtitlesFromVideo(&video, videoContent)
-	}
-	return videoContent, nil
 }
 
 func (od *OnDemand) extractMediaFromVideo(vr *types.Video, videoContent ResourceGroup) {
@@ -132,19 +127,13 @@ func (od *OnDemand) extractLinksFromText(text string) (ResourceGroup, error) {
 		return resx, err
 	}
 	resx.extend(assets)
-	anchors, err := od.extractLinksFromAnchorTags(&page)
-	if err != nil {
-		return resx, err
-	}
+	anchors := od.extractLinksFromAnchorTags(&page)
 	resx.extend(anchors)
 	return resx, nil
 }
 
 func (od *OnDemand) extractLinksFromAssetTags(page *types.AssetPage) (ResourceGroup, error) {
-	assetTags, err := extractAssetTags(page)
-	if err != nil {
-		return nil, err
-	}
+	assetTags := extractAssetTags(page)
 	resx := make(ResourceGroup)
 	if len(assetTags) == 0 {
 		return resx, nil
@@ -160,12 +149,12 @@ func (od *OnDemand) extractLinksFromAssetTags(page *types.AssetPage) (ResourceGr
 	return resx, nil
 }
 
-func extractAssetTags(page *types.AssetPage) (map[string]*types.AssetDefinition, error) {
+func extractAssetTags(page *types.AssetPage) map[string]*types.AssetDefinition {
 	assets := make(map[string]*types.AssetDefinition)
 	for _, a := range page.Assets {
 		assets[a.ID] = &a
 	}
-	return assets, nil
+	return assets
 }
 
 func (od *OnDemand) extractAssetURLs(assetTags map[string]*types.AssetDefinition) ([]*types.Asset, error) {
@@ -173,8 +162,7 @@ func (od *OnDemand) extractAssetURLs(assetTags map[string]*types.AssetDefinition
 	for k := range assetTags {
 		assetIDs = append(assetIDs, k)
 	}
-	ids := strings.Join(assetIDs, ",")
-	url := fmt.Sprintf(api.AssetURL, ids)
+	url := fmt.Sprintf(api.AssetURL, strings.Join(assetIDs, ","))
 	var ar *types.AssetResponse
 	err := od.Session.GetJSON(url, &ar)
 	if err != nil {
@@ -183,7 +171,7 @@ func (od *OnDemand) extractAssetURLs(assetTags map[string]*types.AssetDefinition
 	return ar.Assets, nil
 }
 
-func (od *OnDemand) extractLinksFromAnchorTags(page *types.AssetPage) (ResourceGroup, error) {
+func (od *OnDemand) extractLinksFromAnchorTags(page *types.AssetPage) ResourceGroup {
 	resx := make(ResourceGroup)
 	for _, a := range page.Anchors {
 		if a.Href == "" {
@@ -197,5 +185,5 @@ func (od *OnDemand) extractLinksFromAnchorTags(page *types.AssetPage) (ResourceG
 		base, ext := services.CleanFileName(strings.TrimSuffix(fname, ext)), strings.Trim(services.CleanFileName(ext), " .")
 		resx[ext] = append(resx[ext], &types.Resource{Name: base, Link: a.Href, Extension: ext})
 	}
-	return resx, nil
+	return resx
 }

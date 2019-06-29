@@ -1,10 +1,10 @@
 package services
 
 import (
-	"sensei/api"
 	"net/url"
 	"os"
 	"runtime"
+	"sensei/api"
 	"strings"
 
 	"golang.org/x/net/html"
@@ -31,7 +31,7 @@ func FileExists(fname string) (bool, error) {
 	return false, err
 }
 
-var replacer = strings.NewReplacer(":", "-", "/", "-", "<", "-", ">", "-", "\"", "-", "\\", "-", "|", "-", "?", "-", "*", "-", "\n", " ", "\x00", "-")
+var replacer = strings.NewReplacer(":", "-", "/", "-", "<", "-", ">", "-", "\"", "-", "\\", "-", "|", "-", "?", "-", "*", "-", "(", "", ")", "", "\n", " ", "\x00", "-")
 
 // CleanFileName cleans invalid characters from file name
 func CleanFileName(fname string) string {
@@ -42,14 +42,17 @@ func CleanFileName(fname string) string {
 	}
 	s = replacer.Replace(s)
 	s = strings.TrimRight(s, " .")
-	// Copy from python utils
-	return fname
+	return s
 }
 
 // CleanURL cleans invalid characters from URL
 func CleanURL(link string) string {
-	// Copy from python utils
-	return link
+	u, err := url.Parse(link)
+	if err != nil {
+		return link
+	}
+	u = &url.URL{Scheme: u.Scheme, Host: u.Host, Path: u.Path}
+	return u.RequestURI()
 }
 
 // NormalizeFilePath Prepends device namespace to Windows paths
