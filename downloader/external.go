@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"sensei/api"
+	"sensei/services"
 
 	"github.com/fatih/color"
 )
@@ -26,7 +27,8 @@ func (ed *ExternalDownloader) startDownload(url string, file string, resume bool
 	if resume {
 		command = ed.enableResume(command)
 	}
-	color.Cyan("\t\t> Downloading [%s...] => [%s]", url[:80], file)
+	maxlen := services.Min(80, len(url))
+	color.Cyan("\t\t> Downloading [%s...] => [%s]", url[:maxlen], file)
 	// color.Cyan("Executing %s %s", ed.Binary, command)
 	process := exec.Command(ed.Binary, command...)
 	process.Stdout = os.Stdout

@@ -19,11 +19,11 @@ func (v *Video) GetBestDownload() (*VideoDownload, error) {
 	if available == 0 {
 		return nil, errors.New("Not found any video")
 	}
-	keys := make([]string, len(res))
+	keys := make([]string, 0, len(res))
 	for k := range res {
 		keys = append(keys, k)
 	}
-	sort.Strings(keys)
+	sort.Sort(sort.Reverse(sort.StringSlice(keys)))
 	return res[keys[0]], nil
 }
 

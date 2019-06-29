@@ -3,6 +3,7 @@ package coursera
 import (
 	"fmt"
 	"sensei/api"
+	"sensei/services"
 	"sensei/types"
 	"strings"
 
@@ -93,7 +94,8 @@ func (e *Extractor) fillSectionItems(sr *types.SectionResponse, cm *types.Course
 		}
 		if item.Resources != nil {
 			for _, res := range item.Resources {
-				color.Cyan("\t\t\t [%s] %s...", res.Extension, res.Link[:80])
+				maxlen := services.Min(80, len(res.Link))
+				color.Cyan("\t\t\t [%s] %s...", res.Extension, res.Link[:maxlen])
 			}
 		}
 		items = append(items, item)

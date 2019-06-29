@@ -27,5 +27,5 @@ type Anchor struct {
 // AssetPage model for asset html fragment
 type AssetPage struct {
 	Assets  []AssetDefinition `goquery:"co-content"`
-	Anchors []Anchor          `goquery:"a"`
+	Anchors []Anchor          `goquery:"co-content"`
 }
