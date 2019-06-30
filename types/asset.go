@@ -8,7 +8,7 @@ type Asset struct {
 
 // AssetResponse API response for supplement assets
 type AssetResponse struct {
-	Assets []*Asset `json:"elements"`
+	Elements []*Asset `json:"elements"`
 }
 
 // AssetDefinition API Reponse fragment for asset DTD

@@ -22,6 +22,7 @@ const (
 	LectureVideosURL     = APIBaseURL + "/onDemandLectureVideos.v1/%s~%s/?includes=video&fields=onDemandVideos.v1(sources,subtitles)"
 	SupplementsURL       = APIBaseURL + "/onDemandSupplements.v1/%s~%s?includes=asset&fields=openCourseAssets.v1(typeName),openCourseAssets.v1(definition)"
 	AssetURL             = APIBaseURL + "/assetUrls.v1?ids=%s"
+	OpenCourseAssetsURL  = APIBaseURL + "/openCourseAssets.v1/%s"
 
 	InMemoryMarker   = "#inmemory#"
 	WindowsUNCPrefix = "\\\\?\\"

@@ -10,11 +10,6 @@ import (
 	"github.com/fatih/color"
 )
 
-// IExtractor represents the interface for a url extractor from an API
-type IExtractor interface {
-	GetModules() []string
-}
-
 // Extractor extracts links from the Coursera API
 type Extractor struct {
 	Session *api.Session
@@ -34,28 +29,27 @@ func (e *Extractor) ListCourses() ([]types.CourseResponse, error) {
 
 // GetCourse get the syllabus for a given class
 func (e *Extractor) GetCourse(className string) (*types.Course, error) {
-	syl, err := e.getOnDemandSyllabus(className)
+	syl, err := e.getSyllabus(className)
 	if err != nil {
 		return nil, err
 	}
-	course, err := e.parseOnDemandSyllabus(className, syl)
+	course, err := e.convertSyllabus(className, syl)
 	if err != nil {
 		return nil, err
 	}
 	return course, nil
 }
 
-func (e *Extractor) getOnDemandSyllabus(className string) (*types.CourseMaterialsResponse, error) {
+func (e *Extractor) getSyllabus(className string) (*types.CourseMaterialsResponse, error) {
 	url := fmt.Sprintf(api.CourseMaterialsURL, className)
 	var cmr types.CourseMaterialsResponse
-	err := e.Session.GetJSON(url, &cmr)
-	if err != nil {
+	if err := e.Session.GetJSON(url, &cmr); err != nil {
 		return nil, err
 	}
 	return &cmr, nil
 }
 
-func (e *Extractor) parseOnDemandSyllabus(className string, cm *types.CourseMaterialsResponse) (*types.Course, error) {
+func (e *Extractor) convertSyllabus(className string, cm *types.CourseMaterialsResponse) (*types.Course, error) {
 	if len(cm.Elements) == 0 {
 		return nil, nil
 	}
@@ -66,7 +60,7 @@ func (e *Extractor) parseOnDemandSyllabus(className string, cm *types.CourseMate
 	allModules := cm.GetModuleCollection()
 	for _, mr := range allModules {
 		color.Yellow("Module [%s] [%s]", mr.ID, mr.Name)
-		module, err := e.fillModuleSections(mr, cm, od)
+		module, err := fillModuleSections(mr, cm, od)
 		if err != nil {
 			return nil, err
 		}
@@ -76,7 +70,26 @@ func (e *Extractor) parseOnDemandSyllabus(className string, cm *types.CourseMate
 	return course, nil
 }
 
-func (e *Extractor) fillSectionItems(sr *types.SectionResponse, cm *types.CourseMaterialsResponse,
+// TODO: Move these functions to OnDemand
+func fillModuleSections(mr *types.ModuleResponse, cm *types.CourseMaterialsResponse,
+	course *OnDemand) (*types.Module, error) {
+	module := mr.ToModel()
+	var sections []*types.Section
+	allSections := cm.GetSectionCollection()
+	for _, sid := range mr.LessonIds {
+		sr := allSections[sid]
+		color.Magenta("\tSection [%s] [%s]", sr.ID, sr.Name)
+		section, err := fillSectionItems(sr, cm, course)
+		if err != nil {
+			return nil, err
+		}
+		sections = append(sections, section)
+	}
+	module.Sections = sections
+	return module, nil
+}
+
+func fillSectionItems(sr *types.SectionResponse, cm *types.CourseMaterialsResponse,
 	course *OnDemand) (*types.Section, error) {
 	section := sr.ToModel()
 	var items []*types.Item
@@ -88,7 +101,7 @@ func (e *Extractor) fillSectionItems(sr *types.SectionResponse, cm *types.Course
 			color.Blue("\t\t\t[Locked] Reason: %s", ir.ItemLockSummary.LockState.ReasonCode)
 			continue
 		}
-		item, err := e.fillItemLinks(ir, course)
+		item, err := fillItemLinks(ir, course)
 		if err != nil {
 			return nil, err
 		}
@@ -104,25 +117,7 @@ func (e *Extractor) fillSectionItems(sr *types.SectionResponse, cm *types.Course
 	return section, nil
 }
 
-func (e *Extractor) fillModuleSections(mr *types.ModuleResponse, cm *types.CourseMaterialsResponse,
-	course *OnDemand) (*types.Module, error) {
-	module := mr.ToModel()
-	var sections []*types.Section
-	allSections := cm.GetSectionCollection()
-	for _, sid := range mr.LessonIds {
-		sr := allSections[sid]
-		color.Magenta("\tSection [%s] [%s]", sr.ID, sr.Name)
-		section, err := e.fillSectionItems(sr, cm, course)
-		if err != nil {
-			return nil, err
-		}
-		sections = append(sections, section)
-	}
-	module.Sections = sections
-	return module, nil
-}
-
-func (e *Extractor) fillItemLinks(ir *types.ItemResponse, course *OnDemand) (*types.Item, error) {
+func fillItemLinks(ir *types.ItemResponse, course *OnDemand) (*types.Item, error) {
 	item := ir.ToModel()
 	var resx []*types.Resource
 	switch item.Type {
