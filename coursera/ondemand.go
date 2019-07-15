@@ -5,6 +5,7 @@ import (
 	"log"
 	"sensei/api"
 	"sensei/types"
+	"sensei/views"
 )
 
 // OnDemand downloads a Coursera On Demand course
@@ -21,7 +22,7 @@ func NewOnDemand(session *api.Session, classID string, args *types.Arguments) *O
 
 // ObtainUserID gets the current user id
 func (od *OnDemand) ObtainUserID() (int, error) {
-	var mr types.MembershipsResponse
+	var mr views.MembershipsResponse
 	err := od.Session.GetJSON(api.MembershipsURLLimit1, &mr)
 	if err != nil {
 		return -1, err
@@ -30,8 +31,8 @@ func (od *OnDemand) ObtainUserID() (int, error) {
 }
 
 // ListCourses lists the courses the user is enrolled in
-func (od *OnDemand) ListCourses() ([]types.CourseResponse, error) {
-	var mr types.MembershipsResponse
+func (od *OnDemand) ListCourses() ([]views.CourseResponse, error) {
+	var mr views.MembershipsResponse
 	err := od.Session.GetJSON(api.MembershipsURL, &mr)
 	if err != nil {
 		return nil, err
@@ -58,7 +59,7 @@ func (od *OnDemand) ExtractLinksFromLecture(videoID string) (ResourceGroup, erro
 // * HTML Text - Links
 // * Mathjax - Docuemnts
 func (od *OnDemand) ExtractLinksFromSupplement(elementID string) (ResourceGroup, error) {
-	var sr types.SupplementsResponse
+	var sr views.SupplementsResponse
 	url := fmt.Sprintf(api.SupplementsURL, od.classID, elementID)
 	if err := od.Session.GetJSON(url, &sr); err != nil {
 		return nil, err

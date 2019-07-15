@@ -1,4 +1,4 @@
-package types
+package views
 
 // CourseMaterialsResponse API response for course materials
 type CourseMaterialsResponse struct {

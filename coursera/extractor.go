@@ -5,6 +5,7 @@ import (
 	"sensei/api"
 	"sensei/services"
 	"sensei/types"
+	"sensei/views"
 	"strings"
 
 	"github.com/fatih/color"
@@ -22,7 +23,7 @@ func NewExtractor(session *api.Session, args *types.Arguments) *Extractor {
 }
 
 // ListCourses list the courses the user has enrolled in
-func (e *Extractor) ListCourses() ([]types.CourseResponse, error) {
+func (e *Extractor) ListCourses() ([]views.CourseResponse, error) {
 	course := NewOnDemand(e.Session, "", e.args)
 	return course.ListCourses()
 }
@@ -40,16 +41,16 @@ func (e *Extractor) GetCourse(className string) (*types.Course, error) {
 	return course, nil
 }
 
-func (e *Extractor) getSyllabus(className string) (*types.CourseMaterialsResponse, error) {
+func (e *Extractor) getSyllabus(className string) (*views.CourseMaterialsResponse, error) {
 	url := fmt.Sprintf(api.CourseMaterialsURL, className)
-	var cmr types.CourseMaterialsResponse
+	var cmr views.CourseMaterialsResponse
 	if err := e.Session.GetJSON(url, &cmr); err != nil {
 		return nil, err
 	}
 	return &cmr, nil
 }
 
-func (e *Extractor) convertSyllabus(className string, cm *types.CourseMaterialsResponse) (*types.Course, error) {
+func (e *Extractor) convertSyllabus(className string, cm *views.CourseMaterialsResponse) (*types.Course, error) {
 	if len(cm.Elements) == 0 {
 		return nil, nil
 	}
@@ -71,7 +72,7 @@ func (e *Extractor) convertSyllabus(className string, cm *types.CourseMaterialsR
 }
 
 // TODO: Move these functions to OnDemand
-func fillModuleSections(mr *types.ModuleResponse, cm *types.CourseMaterialsResponse,
+func fillModuleSections(mr *views.ModuleResponse, cm *views.CourseMaterialsResponse,
 	course *OnDemand) (*types.Module, error) {
 	module := mr.ToModel()
 	var sections []*types.Section
@@ -89,7 +90,7 @@ func fillModuleSections(mr *types.ModuleResponse, cm *types.CourseMaterialsRespo
 	return module, nil
 }
 
-func fillSectionItems(sr *types.SectionResponse, cm *types.CourseMaterialsResponse,
+func fillSectionItems(sr *views.SectionResponse, cm *views.CourseMaterialsResponse,
 	course *OnDemand) (*types.Section, error) {
 	section := sr.ToModel()
 	var items []*types.Item
@@ -117,7 +118,7 @@ func fillSectionItems(sr *types.SectionResponse, cm *types.CourseMaterialsRespon
 	return section, nil
 }
 
-func fillItemLinks(ir *types.ItemResponse, course *OnDemand) (*types.Item, error) {
+func fillItemLinks(ir *views.ItemResponse, course *OnDemand) (*types.Item, error) {
 	item := ir.ToModel()
 	var resx []*types.Resource
 	switch item.Type {

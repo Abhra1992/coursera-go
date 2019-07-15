@@ -17,7 +17,7 @@ func HandleSpecialization(args *types.Arguments) {
 	color.Cyan("Name: %s", sp.Name)
 	for _, c := range sp.Courses {
 		color.Green("Course Name: %s", c.Name)
-		DownloadOnDemandClass(session, c.Slug, args)
+		DownloadOnDemandClass(session, c.Symbol, args)
 	}
 }
 

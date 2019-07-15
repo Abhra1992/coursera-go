@@ -3,7 +3,7 @@ package coursera
 import (
 	"fmt"
 	"sensei/api"
-	"sensei/types"
+	"sensei/views"
 	"strings"
 
 	"github.com/fatih/color"
@@ -15,7 +15,7 @@ type NamedAsset struct {
 }
 
 func (od *OnDemand) getLectureAssetIDs(videoID string) ([]string, error) {
-	var ar types.LectureAssetsResponse
+	var ar views.LectureAssetsResponse
 	url := fmt.Sprintf(api.LectureAssetsURL, od.classID, videoID)
 	if err := od.Session.GetJSON(url, &ar); err != nil {
 		return nil, err
@@ -38,7 +38,7 @@ func extractLinksFromLectureAssets(assetIDs []string) {
 }
 
 func (od *OnDemand) getAssetURLs(assetID string) ([]NamedAsset, error) {
-	var ar types.OpenCourseAssetsResponse
+	var ar views.OpenCourseAssetsResponse
 	url := fmt.Sprintf(api.OpenCourseAssetsURL, assetID)
 	if err := od.Session.GetJSON(url, &ar); err != nil {
 		return nil, err

@@ -33,24 +33,30 @@ type VideoDownload struct {
 	WebMVideoURL string `json:"webMVideoUrl"`
 }
 
+type videoSourcePlaylist struct {
+	Hls      string `json:"hls"`
+	MpegDash string `json:"mpeg-dash"`
+}
+
 // VideoSource model for a downloadable video source
 type VideoSource struct {
 	Resolution map[string]*VideoDownload `json:"byResolution"`
-	Playlist   struct {
-		Hls      string `json:"hls"`
-		MpegDash string `json:"mpeg-dash"`
-	} `json:"playlists"`
+	Playlist   videoSourcePlaylist       `json:"playlists"`
+}
+
+type lectureVideosElement struct {
+	CourseID string `json:"courseId"`
+	ID       string `json:"id"`
+	ItemID   string `json:"itemId"`
+}
+
+type lectureVideosLinked struct {
+	Videos []Video `json:"onDemandVideos.v1"`
 }
 
 // LectureVideosResponse API reponse for a lecture video
 type LectureVideosResponse struct {
-	Elements []struct {
-		CourseID string `json:"courseId"`
-		ID       string `json:"id"`
-		ItemID   string `json:"itemId"`
-	} `json:"elements"`
-	Linked struct {
-		Videos []Video `json:"onDemandVideos.v1"`
-	} `json:"linked"`
-	Paging struct{} `json:"paging"`
+	Elements []lectureVideosElement `json:"elements"`
+	Linked   lectureVideosLinked    `json:"linked"`
+	Paging   struct{}               `json:"paging"`
 }
