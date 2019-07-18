@@ -11,6 +11,7 @@ type assetDefinition struct {
 	Value string `json:"value"`
 }
 
+// TODO: Inherit from or Embed assetElement
 type itemAsset struct {
 	CourseID   string          `json:"courseId"`
 	Definition assetDefinition `json:"definition"`

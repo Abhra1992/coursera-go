@@ -1,4 +1,4 @@
-package types
+package views
 
 // Anchor model for supplement assets
 type Anchor struct {

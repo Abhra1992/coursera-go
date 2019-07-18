@@ -8,6 +8,7 @@ import (
 	"sensei/api"
 	"sensei/services"
 	"sensei/types"
+	"sensei/views"
 	"strings"
 
 	"astuart.co/goq"
@@ -15,7 +16,7 @@ import (
 
 func (od *OnDemand) extractLinksFromText(text string) (ResourceGroup, error) {
 	resx := make(ResourceGroup)
-	var page types.CoContents
+	var page views.CoContents
 	err := goq.Unmarshal([]byte(text), &page)
 	if err != nil {
 		log.Println("Error Unmarshalling page")
@@ -31,7 +32,7 @@ func (od *OnDemand) extractLinksFromText(text string) (ResourceGroup, error) {
 	return resx, nil
 }
 
-func (od *OnDemand) extractLinksFromAssetTags(page *types.CoContents) (ResourceGroup, error) {
+func (od *OnDemand) extractLinksFromAssetTags(page *views.CoContents) (ResourceGroup, error) {
 	assetTags := extractAssetTags(page)
 	resx := make(ResourceGroup)
 	if len(assetTags) == 0 {
@@ -48,21 +49,21 @@ func (od *OnDemand) extractLinksFromAssetTags(page *types.CoContents) (ResourceG
 	return resx, nil
 }
 
-func extractAssetTags(page *types.CoContents) map[string]*types.CoContentAsset {
-	assets := make(map[string]*types.CoContentAsset)
+func extractAssetTags(page *views.CoContents) map[string]*views.CoContentAsset {
+	assets := make(map[string]*views.CoContentAsset)
 	for _, a := range page.Assets {
 		assets[a.ID] = &a
 	}
 	return assets
 }
 
-func (od *OnDemand) extractAssetURLs(assetTags map[string]*types.CoContentAsset) ([]*types.Anchor, error) {
+func (od *OnDemand) extractAssetURLs(assetTags map[string]*views.CoContentAsset) ([]*views.Anchor, error) {
 	assetIDs := make([]string, 0, len(assetTags))
 	for k := range assetTags {
 		assetIDs = append(assetIDs, k)
 	}
 	url := fmt.Sprintf(api.AssetURL, strings.Join(assetIDs, ","))
-	var ar *types.AnchorCollection
+	var ar *views.AnchorCollection
 	err := od.Session.GetJSON(url, &ar)
 	if err != nil {
 		return nil, err
@@ -73,7 +74,7 @@ func (od *OnDemand) extractAssetURLs(assetTags map[string]*types.CoContentAsset)
 	return ar.Elements, nil
 }
 
-func (od *OnDemand) extractLinksFromAnchorTags(page *types.CoContents) ResourceGroup {
+func (od *OnDemand) extractLinksFromAnchorTags(page *views.CoContents) ResourceGroup {
 	resx := make(ResourceGroup)
 	for _, a := range page.Anchors {
 		if a.Link == "" {

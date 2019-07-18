@@ -5,10 +5,11 @@ import (
 	"log"
 	"sensei/api"
 	"sensei/types"
+	"sensei/views"
 )
 
 func (od *OnDemand) extractMediaAndSubtitles(videoID string) (ResourceGroup, error) {
-	var vr types.LectureVideosResponse
+	var vr views.LectureVideosResponse
 	url := fmt.Sprintf(api.LectureVideosURL, od.classID, videoID)
 	err := od.Session.GetJSON(url, &vr)
 	if err != nil {
@@ -26,7 +27,7 @@ func (od *OnDemand) extractMediaAndSubtitles(videoID string) (ResourceGroup, err
 	return content, nil
 }
 
-func (od *OnDemand) extractMediaFromVideo(vr *types.Video, videoContent ResourceGroup) {
+func (od *OnDemand) extractMediaFromVideo(vr *views.Video, videoContent ResourceGroup) {
 	if vr.Source.Resolution != nil {
 		res := od.args.Resolution
 		if res == "" {
@@ -43,7 +44,7 @@ func (od *OnDemand) extractMediaFromVideo(vr *types.Video, videoContent Resource
 	}
 }
 
-func (od *OnDemand) extractSubtitlesFromVideo(vr *types.Video, videoContent ResourceGroup) {
+func (od *OnDemand) extractSubtitlesFromVideo(vr *views.Video, videoContent ResourceGroup) {
 	if vr.Subtitles != nil {
 		lang := od.args.SubtitleLanguage
 		if lang == "" {
