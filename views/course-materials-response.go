@@ -1,16 +1,20 @@
 package views
 
+type courseMaterialsElement struct {
+	ID        string   `json:"id"`
+	ModuleIds []string `json:"moduleIds"`
+}
+
+type courseMaterialsLinked struct {
+	Items   []ItemResponse    `json:"onDemandCourseMaterialItems.v2"`
+	Lessons []SectionResponse `json:"onDemandCourseMaterialLessons.v1"`
+	Modules []ModuleResponse  `json:"onDemandCourseMaterialModules.v1"`
+}
+
 // CourseMaterialsResponse API response for course materials
 type CourseMaterialsResponse struct {
-	Elements []struct {
-		ID        string   `json:"id"`
-		ModuleIds []string `json:"moduleIds"`
-	} `json:"elements"`
-	Linked struct {
-		Items   []ItemResponse    `json:"onDemandCourseMaterialItems.v2"`
-		Lessons []SectionResponse `json:"onDemandCourseMaterialLessons.v1"`
-		Modules []ModuleResponse  `json:"onDemandCourseMaterialModules.v1"`
-	} `json:"linked"`
+	Elements []courseMaterialsElement `json:"elements"`
+	Linked   courseMaterialsLinked    `json:"linked"`
 }
 
 // GetItemCollection items in the course materials

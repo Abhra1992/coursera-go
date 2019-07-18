@@ -15,7 +15,7 @@ import (
 
 func (od *OnDemand) extractLinksFromText(text string) (ResourceGroup, error) {
 	resx := make(ResourceGroup)
-	var page types.AssetPage
+	var page types.CoContents
 	err := goq.Unmarshal([]byte(text), &page)
 	if err != nil {
 		log.Println("Error Unmarshalling page")
@@ -31,7 +31,7 @@ func (od *OnDemand) extractLinksFromText(text string) (ResourceGroup, error) {
 	return resx, nil
 }
 
-func (od *OnDemand) extractLinksFromAssetTags(page *types.AssetPage) (ResourceGroup, error) {
+func (od *OnDemand) extractLinksFromAssetTags(page *types.CoContents) (ResourceGroup, error) {
 	assetTags := extractAssetTags(page)
 	resx := make(ResourceGroup)
 	if len(assetTags) == 0 {
@@ -42,27 +42,27 @@ func (od *OnDemand) extractLinksFromAssetTags(page *types.AssetPage) (ResourceGr
 		return nil, err
 	}
 	for _, a := range assets {
-		title, ext, link := services.CleanFileName(assetTags[a.ID].Name), services.CleanFileName(assetTags[a.ID].Extension), a.URL
+		title, ext, link := services.CleanFileName(assetTags[a.ID].Name), services.CleanFileName(assetTags[a.ID].Extension), a.Link
 		resx[ext] = append(resx[ext], &types.Resource{Name: title, Link: link, Extension: ext})
 	}
 	return resx, nil
 }
 
-func extractAssetTags(page *types.AssetPage) map[string]*types.AssetDefinition {
-	assets := make(map[string]*types.AssetDefinition)
+func extractAssetTags(page *types.CoContents) map[string]*types.CoContentAsset {
+	assets := make(map[string]*types.CoContentAsset)
 	for _, a := range page.Assets {
 		assets[a.ID] = &a
 	}
 	return assets
 }
 
-func (od *OnDemand) extractAssetURLs(assetTags map[string]*types.AssetDefinition) ([]*types.Asset, error) {
+func (od *OnDemand) extractAssetURLs(assetTags map[string]*types.CoContentAsset) ([]*types.Anchor, error) {
 	assetIDs := make([]string, 0, len(assetTags))
 	for k := range assetTags {
 		assetIDs = append(assetIDs, k)
 	}
 	url := fmt.Sprintf(api.AssetURL, strings.Join(assetIDs, ","))
-	var ar *types.AssetResponse
+	var ar *types.AnchorCollection
 	err := od.Session.GetJSON(url, &ar)
 	if err != nil {
 		return nil, err
@@ -73,19 +73,19 @@ func (od *OnDemand) extractAssetURLs(assetTags map[string]*types.AssetDefinition
 	return ar.Elements, nil
 }
 
-func (od *OnDemand) extractLinksFromAnchorTags(page *types.AssetPage) ResourceGroup {
+func (od *OnDemand) extractLinksFromAnchorTags(page *types.CoContents) ResourceGroup {
 	resx := make(ResourceGroup)
 	for _, a := range page.Anchors {
-		if a.Href == "" {
+		if a.Link == "" {
 			continue
 		}
-		fname := path.Base(services.CleanURL(a.Href))
+		fname := path.Base(services.CleanURL(a.Link))
 		ext := strings.ToLower(filepath.Ext(fname))
 		if ext == "" {
 			continue
 		}
 		base, ext := services.CleanFileName(strings.TrimSuffix(fname, ext)), strings.Trim(services.CleanFileName(ext), " .")
-		resx[ext] = append(resx[ext], &types.Resource{Name: base, Link: a.Href, Extension: ext})
+		resx[ext] = append(resx[ext], &types.Resource{Name: base, Link: a.Link, Extension: ext})
 	}
 	return resx
 }
