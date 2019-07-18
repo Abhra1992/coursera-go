@@ -13,9 +13,9 @@ func main() {
 
 	switch args.ClassType {
 	case "spz":
-		cmd.HandleSpecialization(&args)
+		cmd.DownloadSpecialization(&args)
 	case "course":
-		cmd.HandleCourses(&args)
+		cmd.DownloadCourses(&args)
 	case "list":
 		cmd.ListCourses(&args)
 	}

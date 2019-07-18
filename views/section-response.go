@@ -17,6 +17,6 @@ type SectionResponse struct {
 func (sr *SectionResponse) ToModel() *types.Section {
 	return &types.Section{
 		ID: sr.ID, Name: sr.Name, Symbol: sr.Slug,
-		Items: nil, ModuleID: sr.ModuleID,
+		ModuleID: sr.ModuleID, Items: nil,
 	}
 }

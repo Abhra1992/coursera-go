@@ -59,7 +59,7 @@ func (od *OnDemand) ExtractLinksFromLecture(videoID string) (ResourceGroup, erro
 // * HTML Text - Links
 // * Mathjax - Docuemnts
 func (od *OnDemand) ExtractLinksFromSupplement(elementID string) (ResourceGroup, error) {
-	var sr views.SupplementsResponse
+	var sr views.AssetsResponse
 	url := fmt.Sprintf(api.SupplementsURL, od.classID, elementID)
 	if err := od.Session.GetJSON(url, &sr); err != nil {
 		return nil, err

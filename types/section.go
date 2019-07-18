@@ -5,6 +5,6 @@ type Section struct {
 	ID       string
 	Name     string
 	Symbol   string
-	Items    []*Item
 	ModuleID string
+	Items    []*Item
 }

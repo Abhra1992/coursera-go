@@ -15,7 +15,7 @@ type NamedAsset struct {
 }
 
 func (od *OnDemand) getLectureAssetIDs(videoID string) ([]string, error) {
-	var ar views.LectureAssetsResponse
+	var ar views.AssetsResponse
 	url := fmt.Sprintf(api.LectureAssetsURL, od.classID, videoID)
 	if err := od.Session.GetJSON(url, &ar); err != nil {
 		return nil, err
