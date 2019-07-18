@@ -18,8 +18,8 @@ type videoSourcePlaylist struct {
 
 // videoSource model for a downloadable video source
 type videoSource struct {
-	Resolution map[string]*VideoDownload `json:"byResolution"`
-	Playlist   videoSourcePlaylist       `json:"playlists"`
+	Resolutions map[string]*VideoDownload `json:"byResolution"`
+	Playlist    videoSourcePlaylist       `json:"playlists"`
 }
 
 // Video model for an item video
@@ -31,7 +31,7 @@ type Video struct {
 
 // GetBestDownload determines the best quality video available
 func (v *Video) GetBestDownload() (*VideoDownload, error) {
-	res := v.Source.Resolution
+	res := v.Source.Resolutions
 	available := len(res)
 	if available == 0 {
 		return nil, errors.New("Not found any video")

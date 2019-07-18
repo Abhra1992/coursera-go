@@ -28,7 +28,7 @@ func (od *OnDemand) extractMediaAndSubtitles(videoID string) (ResourceGroup, err
 }
 
 func (od *OnDemand) extractMediaFromVideo(vr *views.Video, videoContent ResourceGroup) {
-	if vr.Source.Resolution != nil {
+	if vr.Source.Resolutions != nil {
 		res := od.args.Resolution
 		if res == "" {
 			if link, err := vr.GetBestDownload(); err == nil && link != nil {
@@ -36,7 +36,7 @@ func (od *OnDemand) extractMediaFromVideo(vr *views.Video, videoContent Resource
 				videoContent["mp4"] = append(videoContent["mp4"], res)
 			}
 		} else {
-			if link, ok := vr.Source.Resolution[res]; ok {
+			if link, ok := vr.Source.Resolutions[res]; ok {
 				res := &types.Resource{Name: vr.ID, Link: link.Mp4VideoURL, Extension: "mp4"}
 				videoContent["mp4"] = append(videoContent["mp4"], res)
 			}
