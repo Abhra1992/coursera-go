@@ -40,25 +40,24 @@ func (od *OnDemand) ListCourses() ([]views.CourseResponse, error) {
 	return mr.Linked.Courses, nil
 }
 
-// ExtractLinksFromLecture gets the links to resurces in a lecture item
+// extractLinksFromLecture gets the links to resurces in a lecture item
 // Lecture resources are obtained from:
 // * Video - Media and Subtitles
 // * Assets - Links
-func (od *OnDemand) ExtractLinksFromLecture(videoID string) (ResourceGroup, error) {
+func (od *OnDemand) extractLinksFromLecture(videoID string) (ResourceGroup, error) {
 	content, err := od.extractMediaAndSubtitles(videoID)
 	if err != nil {
 		log.Panicf("Could not download videos")
 		return nil, err
 	}
-
 	return content, nil
 }
 
-// ExtractLinksFromSupplement gets the links to resources in a supplement item
+// extractLinksFromSupplement gets the links to resources in a supplement item
 // Supplement resources are obtained from:
 // * HTML Text - Links
 // * Mathjax - Docuemnts
-func (od *OnDemand) ExtractLinksFromSupplement(elementID string) (ResourceGroup, error) {
+func (od *OnDemand) extractLinksFromSupplement(elementID string) (ResourceGroup, error) {
 	var sr views.AssetsResponse
 	url := fmt.Sprintf(api.SupplementsURL, od.classID, elementID)
 	if err := od.Session.GetJSON(url, &sr); err != nil {

@@ -23,7 +23,7 @@ func (ed *ExternalDownloader) Download(url string, file string, resume bool) err
 
 func (ed *ExternalDownloader) startDownload(url string, file string, resume bool) error {
 	command := ed.createCommand(url, file)
-	command = ed.prepareCookies(command, url)
+	command = ed.prepareCookies(command)
 	if resume {
 		command = ed.enableResume(command)
 	}
@@ -41,7 +41,7 @@ func (ed *ExternalDownloader) startDownload(url string, file string, resume bool
 	return nil
 }
 
-func (ed *ExternalDownloader) prepareCookies(command []string, url string) []string {
+func (ed *ExternalDownloader) prepareCookies(command []string) []string {
 	cookies := ed.Session.RequestOptions.Cookies
 	if len(cookies) > 0 {
 		command = ed.addCookies(command, api.BuildCookieHeader(cookies))

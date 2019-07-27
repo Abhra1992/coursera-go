@@ -17,7 +17,7 @@ func (od *OnDemand) extractMediaAndSubtitles(videoID string) (ResourceGroup, err
 	}
 	if len(vr.Linked.Videos) == 0 {
 		log.Println("No Videos available")
-		return nil, err
+		return nil, nil
 	}
 	content := make(ResourceGroup)
 	for _, video := range vr.Linked.Videos {
@@ -29,16 +29,16 @@ func (od *OnDemand) extractMediaAndSubtitles(videoID string) (ResourceGroup, err
 
 func (od *OnDemand) extractMediaFromVideo(vr *views.Video, videoContent ResourceGroup) {
 	if vr.Source.Resolutions != nil {
-		res := od.args.Resolution
-		if res == "" {
+		resolution := od.args.Resolution
+		if resolution == "" {
 			if link, err := vr.GetBestDownload(); err == nil && link != nil {
-				res := &types.Resource{Name: vr.ID, Link: link.Mp4VideoURL, Extension: "mp4"}
-				videoContent["mp4"] = append(videoContent["mp4"], res)
+				resource := &types.Resource{Name: vr.ID, Link: link.Mp4VideoURL, Extension: "mp4"}
+				videoContent["mp4"] = append(videoContent["mp4"], resource)
 			}
 		} else {
-			if link, ok := vr.Source.Resolutions[res]; ok {
-				res := &types.Resource{Name: vr.ID, Link: link.Mp4VideoURL, Extension: "mp4"}
-				videoContent["mp4"] = append(videoContent["mp4"], res)
+			if link, ok := vr.Source.Resolutions[resolution]; ok {
+				resource := &types.Resource{Name: vr.ID, Link: link.Mp4VideoURL, Extension: "mp4"}
+				videoContent["mp4"] = append(videoContent["mp4"], resource)
 			}
 		}
 	}
@@ -51,8 +51,8 @@ func (od *OnDemand) extractSubtitlesFromVideo(vr *views.Video, videoContent Reso
 			lang = "en"
 		}
 		if link, ok := vr.Subtitles[lang]; ok {
-			res := &types.Resource{Name: vr.ID, Link: api.MakeCourseraAbsoluteURL(link), Extension: "srt"}
-			videoContent["srt"] = append(videoContent["srt"], res)
+			resource := &types.Resource{Name: vr.ID, Link: api.MakeCourseraAbsoluteURL(link), Extension: "srt"}
+			videoContent["srt"] = append(videoContent["srt"], resource)
 		}
 	}
 }

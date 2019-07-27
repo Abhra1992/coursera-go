@@ -28,7 +28,7 @@ func DownloadOnDemandClass(cs *api.Session, className string, args *types.Argume
 		if syllabusExists {
 			syl, err := ioutil.ReadFile(sf)
 			if err != nil {
-				color.Red("Could not read syllabus for %s", className)
+				color.Red("Could not read cached syllabus for %s", className)
 				return false, err
 			}
 			json.Unmarshal(syl, &course)
@@ -38,12 +38,12 @@ func DownloadOnDemandClass(cs *api.Session, className string, args *types.Argume
 	if course == nil {
 		// TODO: this extractor step can go inside workflow
 		ce := coursera.NewExtractor(cs, args)
-		ems, err := ce.GetCourse(className)
-		if err != nil || ems == nil {
-			color.Red("Could not get course syllabus")
+		syl, err := ce.ExtractCourse(className)
+		if err != nil || syl == nil {
+			color.Red("Could not get course syllabus for %s", className)
 			return false, err
 		}
-		course = ems
+		course = syl
 	}
 	// Check if syllabus should be cached - if yes, save it
 	if args.CacheSyllabus {
