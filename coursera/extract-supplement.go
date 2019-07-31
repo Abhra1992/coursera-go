@@ -42,6 +42,9 @@ func (od *OnDemand) extractLinksFromAssetTags(page *views.CoContents) (ResourceG
 	if err != nil {
 		return nil, err
 	}
+	if assets == nil {
+		return resx, nil
+	}
 	for _, a := range assets {
 		title, ext, link := services.CleanFileName(assetTags[a.ID].Name), services.CleanFileName(assetTags[a.ID].Extension), a.Link
 		resx[ext] = append(resx[ext], &types.Resource{Name: title, Link: link, Extension: ext})
